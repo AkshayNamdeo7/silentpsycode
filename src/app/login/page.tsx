@@ -9,11 +9,13 @@ import Button from "@/components/ui/button";
 import OAuthButton from "@/components/auth/oauth-button";
 import PasswordToggleInput from "@/components/auth/password-toggle-input";
 import Input from "@/components/ui/input";
+import { signInWithEmail } from "@/lib/auth";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
   const validate = () => {
@@ -31,11 +33,19 @@ export default function LoginPage() {
     return nextErrors;
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const nextErrors = validate();
     setErrors(nextErrors);
-    setSubmitted(Object.keys(nextErrors).length === 0);
+
+    if (Object.keys(nextErrors).length === 0) {
+      const result = await signInWithEmail(email, password);
+      setStatusMessage(result.message ?? "Login request accepted.");
+      setSubmitted(result.success);
+    } else {
+      setStatusMessage(null);
+      setSubmitted(false);
+    }
   };
 
   return (
@@ -98,7 +108,6 @@ export default function LoginPage() {
                 </div>
                 <PasswordToggleInput
                   id="password"
-                  label=""
                   placeholder="Enter your password"
                   value={password}
                   onChange={setPassword}
@@ -110,9 +119,9 @@ export default function LoginPage() {
                 Continue
               </Button>
 
-              {submitted ? (
+              {statusMessage ? (
                 <p className="rounded-3xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-                  Login form is valid. Backend integration will be added later.
+                  {statusMessage}
                 </p>
               ) : null}
             </form>

@@ -9,6 +9,7 @@ import Button from "@/components/ui/button";
 import OAuthButton from "@/components/auth/oauth-button";
 import PasswordToggleInput from "@/components/auth/password-toggle-input";
 import Input from "@/components/ui/input";
+import { signUpWithEmail } from "@/lib/auth";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -16,6 +17,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [submitted, setSubmitted] = useState(false);
 
   const validate = () => {
@@ -40,11 +42,19 @@ export default function RegisterPage() {
     return nextErrors;
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const nextErrors = validate();
     setErrors(nextErrors);
-    setSubmitted(Object.keys(nextErrors).length === 0);
+
+    if (Object.keys(nextErrors).length === 0) {
+      const result = await signUpWithEmail(name, email, password);
+      setStatusMessage(result.message ?? "Registration request accepted.");
+      setSubmitted(result.success);
+    } else {
+      setStatusMessage(null);
+      setSubmitted(false);
+    }
   };
 
   return (
@@ -136,9 +146,9 @@ export default function RegisterPage() {
                 Create account
               </Button>
 
-              {submitted ? (
+              {statusMessage ? (
                 <p className="rounded-3xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
-                  Registration form is valid. Backend integration will be added later.
+                  {statusMessage}
                 </p>
               ) : null}
             </form>
