@@ -4,11 +4,11 @@ import Link from "next/link";
 import { BookOpen, Home, LayoutDashboard, Users, Settings, X } from "lucide-react";
 
 const navItems = [
-  { label: "Overview", icon: LayoutDashboard, href: "/dashboard" },
-  { label: "My Books", icon: BookOpen, href: "/dashboard" },
-  { label: "Orders", icon: Home, href: "/dashboard" },
-  { label: "Community", icon: Users, href: "/dashboard" },
-  { label: "Settings", icon: Settings, href: "/dashboard" },
+  { label: "Overview", icon: LayoutDashboard, href: "/dashboard#overview" },
+  { label: "My Books", icon: BookOpen, href: "/dashboard#listings" },
+  { label: "Orders", icon: Home, href: "/dashboard#orders" },
+  { label: "Community", icon: Users, href: "/dashboard#community" },
+  { label: "Settings", icon: Settings, href: "/dashboard#settings" },
 ];
 
 interface SidebarProps {

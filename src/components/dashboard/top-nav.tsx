@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { Menu, X, ChevronDown, Search, Bell } from "lucide-react";
@@ -41,12 +42,12 @@ export default function TopNav({ onToggleSidebar }: TopNavProps) {
           <Bell className="h-4 w-4" />
         </button>
 
-        <motion.button
-          whileHover={{ scale: 1.02 }}
+        <Link
+          href="/sell"
           className="hidden rounded-full bg-sky-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 sm:inline-flex"
         >
           Sell a Book
-        </motion.button>
+        </Link>
 
         <div className="relative">
           <button
