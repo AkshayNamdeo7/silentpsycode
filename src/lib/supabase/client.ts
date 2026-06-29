@@ -2,9 +2,10 @@ import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+const isConfigured = Boolean(supabaseUrl && supabaseAnonKey);
 
 export const supabase: SupabaseClient =
-  typeof window !== "undefined"
+  typeof window !== "undefined" && isConfigured
     ? createClient(supabaseUrl, supabaseAnonKey, {
         auth: {
           persistSession: true,
@@ -14,4 +15,4 @@ export const supabase: SupabaseClient =
       })
     : ({} as SupabaseClient);
 
-export const isSupabaseClientConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+export const isSupabaseClientConfigured = isConfigured;

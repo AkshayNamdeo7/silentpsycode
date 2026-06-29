@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { isSupabaseClientConfigured, supabase } from "@/lib/supabase";
 
 export interface BookForm {
   images: File[];
@@ -29,41 +29,62 @@ export interface BookRecord {
   selling_price: number;
   original_price: number | null;
   status: string;
-  is_draft: boolean;
   category: string;
   subject: string;
   created_at: string;
+  is_draft?: boolean;
+}
+
+function buildBookDescription(form: BookForm) {
+  const details = [
+    form.description?.trim(),
+    form.sellerName ? `Seller: ${form.sellerName}` : undefined,
+    form.sellerPhone ? `Phone: ${form.sellerPhone}` : undefined,
+    form.email ? `Email: ${form.email}` : undefined,
+    form.contactPreference ? `Contact preference: ${form.contactPreference}` : undefined,
+  ].filter(Boolean);
+
+  return details.join("\n\n");
 }
 
 export async function publishBook(form: BookForm) {
-  const session = await supabase.auth.getSession();
-  const userId = session.data.session?.user?.id;
+  if (!isSupabaseClientConfigured) {
+    return {
+      success: false,
+      message: "Supabase is not configured yet. Add your environment variables first.",
+    };
+  }
 
+  const {
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession();
+
+  if (sessionError) {
+    return { success: false, message: sessionError.message };
+  }
+
+  const userId = session?.user?.id;
   if (!userId) {
     return { success: false, message: "Please sign in before publishing a book." };
   }
 
   const bookPayload = {
-    user_id: userId,
-    title: form.title,
-    author: form.author,
-    isbn: form.isbn || null,
+    seller_id: userId,
+    title: form.title.trim(),
+    author: form.author.trim(),
+    isbn: form.isbn?.trim() || null,
     category: form.category,
-    subject: form.subject,
+    subject: form.subject.trim(),
     condition: form.condition,
     selling_price: Number(form.sellingPrice) || 0,
     original_price: form.originalPrice ? Number(form.originalPrice) : null,
-    description: form.description,
-    college: form.college,
-    branch: form.branch,
-    semester: form.semester,
-    city: form.city,
-    seller_phone: form.sellerPhone,
-    whatsapp_number: form.whatsappNumber,
-    email: form.email,
-    contact_preference: form.contactPreference,
-    status: "live",
-    is_draft: false,
+    description: buildBookDescription(form),
+    college: form.college.trim(),
+    branch: form.branch.trim(),
+    semester: form.semester.trim(),
+    city: form.city.trim(),
+    status: "active",
   };
 
   const { data: bookData, error: bookError } = await supabase
@@ -96,9 +117,8 @@ export async function publishBook(form: BookForm) {
 
         return {
           book_id: bookId,
-          url: publicUrlData.publicUrl,
-          storage_path: path,
-          order: index + 1,
+          image_url: publicUrlData.publicUrl,
+          display_order: index + 1,
         };
       })
     );
@@ -115,8 +135,10 @@ export async function publishBook(form: BookForm) {
 }
 
 export async function getMyBooks() {
-  const session = await supabase.auth.getSession();
-  const userId = session.data.session?.user?.id;
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const userId = session?.user?.id;
 
   if (!userId) {
     return { books: [] as BookRecord[], counts: { total: 0, active: 0, drafts: 0, sold: 0 } };
@@ -124,18 +146,16 @@ export async function getMyBooks() {
 
   const { data, error } = await supabase
     .from("books")
-    .select(
-      "id,title,author,selling_price,original_price,status,is_draft,category,subject,created_at"
-    )
-    .eq("user_id", userId)
+    .select("id,title,author,selling_price,original_price,status,category,subject,created_at")
+    .eq("seller_id", userId)
     .order("created_at", { ascending: false });
 
   const books = (data ?? []) as BookRecord[];
   const counts = {
     total: books.length,
-    drafts: books.filter((book) => book.is_draft).length,
+    drafts: books.filter((book) => book.status === "draft").length,
     sold: books.filter((book) => book.status === "sold").length,
-    active: books.filter((book) => !book.is_draft && book.status !== "sold").length,
+    active: books.filter((book) => book.status === "active").length,
   };
 
   return { books, counts, error };
