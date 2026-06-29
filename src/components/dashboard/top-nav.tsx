@@ -2,15 +2,24 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Menu, X, ChevronDown, Search, Bell } from "lucide-react";
+import { signOut } from "@/lib/auth";
 
 interface TopNavProps {
   onToggleSidebar: () => void;
 }
 
 export default function TopNav({ onToggleSidebar }: TopNavProps) {
+  const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
+
+  const handleSignOut = async () => {
+    setProfileOpen(false);
+    await signOut();
+    router.push("/");
+  };
 
   return (
     <div className="mx-auto flex max-w-[1600px] items-center justify-between gap-4 px-4 py-4 sm:px-6 xl:px-8">
@@ -78,7 +87,10 @@ export default function TopNav({ onToggleSidebar }: TopNavProps) {
                 <button className="w-full rounded-3xl px-4 py-3 text-left text-sm text-slate-200 transition hover:bg-slate-900">
                   Billing
                 </button>
-                <button className="w-full rounded-3xl px-4 py-3 text-left text-sm text-slate-200 transition hover:bg-slate-900">
+                <button
+                  className="w-full rounded-3xl px-4 py-3 text-left text-sm text-slate-200 transition hover:bg-slate-900"
+                  onClick={handleSignOut}
+                >
                   Sign out
                 </button>
               </div>

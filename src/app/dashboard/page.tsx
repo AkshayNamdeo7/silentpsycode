@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowUpRight, BookOpen, ChartBar, ShoppingBag, Sparkles } from "lucide-react";
 import Button from "@/components/ui/button";
@@ -8,27 +9,9 @@ import MetricCard from "@/components/dashboard/metric-card";
 import BookCard from "@/components/dashboard/book-card";
 import ActivityCard from "@/components/dashboard/activity-card";
 import EmptyState from "@/components/dashboard/empty-state";
+import { getMyBooks, type BookRecord } from "@/lib/books";
 
-const metrics = [
-  {
-    label: "Total earnings",
-    value: "₹18,360",
-    description: "Revenue from recent book sales, paid out and ready for transfer.",
-    icon: <ChartBar className="h-5 w-5" />,
-  },
-  {
-    label: "Active listings",
-    value: "8",
-    description: "Books currently live in the marketplace for buyers to browse.",
-    icon: <BookOpen className="h-5 w-5" />,
-  },
-  {
-    label: "Buyer requests",
-    value: "12",
-    description: "Open inquiries from readers interested in your titles.",
-    icon: <ShoppingBag className="h-5 w-5" />,
-  },
-];
+const defaultBooks: BookRecord[] = [];
 
 const books = [
   {
@@ -76,6 +59,46 @@ const activity = [
 ];
 
 export default function DashboardPage() {
+  const [books, setBooks] = useState<BookRecord[]>(defaultBooks);
+  const [counts, setCounts] = useState({ total: 0, active: 0, drafts: 0, sold: 0 });
+  const [loadingBooks, setLoadingBooks] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadBooks() {
+      const response = await getMyBooks();
+      setBooks(response.books ?? []);
+      setCounts(response.counts ?? { total: 0, active: 0, drafts: 0, sold: 0 });
+      setFetchError(response.error?.message ?? null);
+      setLoadingBooks(false);
+    }
+
+    loadBooks();
+  }, []);
+
+  const metrics = [
+    {
+      label: "Total listings",
+      value: counts.total.toString(),
+      description: "Books you currently have in the marketplace.",
+      icon: <ChartBar className="h-5 w-5" />,
+    },
+    {
+      label: "Live books",
+      value: counts.active.toString(),
+      description: "Listings visible to buyers right now.",
+      icon: <BookOpen className="h-5 w-5" />,
+    },
+    {
+      label: "Drafts",
+      value: counts.drafts.toString(),
+      description: "Books saved as drafts for later publishing.",
+      icon: <ShoppingBag className="h-5 w-5" />,
+    },
+  ];
+
+  const previewBooks = loadingBooks ? [] : books;
+
   return (
     <div className="space-y-8">
       <section id="overview" className="rounded-[2rem] border border-white/10 bg-slate-950/95 p-8 shadow-[0_40px_100px_-50px_rgba(15,23,42,0.7)]">
@@ -128,27 +151,43 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid gap-4">
-            {books.map((book) => (
-              <BookCard
-                key={book.title}
-                title={book.title}
-                author={book.author}
-                price={book.price}
-                status={book.status}
-                badge={book.badge}
-                details={book.details}
+            {loadingBooks ? (
+              <div className="rounded-[1.75rem] border border-white/10 bg-slate-900/90 p-6 text-slate-400">
+                Loading your books...
+              </div>
+            ) : previewBooks.length > 0 ? (
+              previewBooks.map((book) => (
+                <BookCard
+                  key={book.id}
+                  title={book.title}
+                  author={book.author}
+                  price={`₹${book.selling_price}`}
+                  status={book.status}
+                  badge={book.is_draft ? "Draft" : book.status === "sold" ? "Sold" : "Live"}
+                  details={`${book.category} · ${new Date(book.created_at).toLocaleDateString()}`}
+                  action={
+                    <div className="flex flex-wrap gap-3">
+                      <Button variant="secondary" className="px-4 py-2 text-sm">
+                        Edit
+                      </Button>
+                      <Button className="px-4 py-2 text-sm">
+                        Preview
+                      </Button>
+                    </div>
+                  }
+                />
+              ))
+            ) : (
+              <EmptyState
+                title="No books yet"
+                description="Your published books will appear here once you create your first listing. Start selling to populate your dashboard."
                 action={
-                  <div className="flex flex-wrap gap-3">
-                    <Button variant="secondary" className="px-4 py-2 text-sm">
-                      Edit
-                    </Button>
-                    <Button className="px-4 py-2 text-sm">
-                      Preview
-                    </Button>
-                  </div>
+                  <Button asChild variant="secondary" className="px-5 py-3">
+                    <a href="/sell">Publish your first book</a>
+                  </Button>
                 }
               />
-            ))}
+            )}
           </div>
         </div>
 

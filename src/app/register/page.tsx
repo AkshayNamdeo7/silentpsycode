@@ -4,6 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import AuthCard from "@/components/auth/auth-card";
 import Button from "@/components/ui/button";
 import OAuthButton from "@/components/auth/oauth-button";
@@ -12,6 +13,7 @@ import Input from "@/components/ui/input";
 import { signUpWithEmail } from "@/lib/auth";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,6 +53,10 @@ export default function RegisterPage() {
       const result = await signUpWithEmail(name, email, password);
       setStatusMessage(result.message ?? "Registration request accepted.");
       setSubmitted(result.success);
+
+      if (result.success) {
+        router.push("/dashboard");
+      }
     } else {
       setStatusMessage(null);
       setSubmitted(false);

@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { motion } from "framer-motion";
 import { Mail } from "lucide-react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import AuthCard from "@/components/auth/auth-card";
 import Button from "@/components/ui/button";
 import OAuthButton from "@/components/auth/oauth-button";
@@ -11,7 +12,9 @@ import PasswordToggleInput from "@/components/auth/password-toggle-input";
 import Input from "@/components/ui/input";
 import { signInWithEmail } from "@/lib/auth";
 
-export default function LoginPage() {
+function LoginForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -42,6 +45,11 @@ export default function LoginPage() {
       const result = await signInWithEmail(email, password);
       setStatusMessage(result.message ?? "Login request accepted.");
       setSubmitted(result.success);
+
+      if (result.success) {
+        const redirectTo = searchParams?.get("redirect") ?? "/dashboard";
+        router.push(redirectTo);
+      }
     } else {
       setStatusMessage(null);
       setSubmitted(false);
@@ -129,5 +137,13 @@ export default function LoginPage() {
         </AuthCard>
       </motion.div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }

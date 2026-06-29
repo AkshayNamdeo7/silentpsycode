@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { Info, MapPin, ShieldCheck, Sparkles } from "lucide-react";
 import Button from "@/components/ui/button";
@@ -8,6 +9,7 @@ import Dropzone from "@/components/ui/dropzone";
 import Input from "@/components/ui/input";
 import Select from "@/components/ui/select";
 import Textarea from "@/components/ui/textarea";
+import { publishBook } from "@/lib/books";
 
 const categories = [
   "Engineering",
@@ -45,9 +47,12 @@ const initialState = {
 };
 
 export default function SellPage() {
+  const router = useRouter();
   const [form, setForm] = useState(initialState);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [submitted, setSubmitted] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [publishSuccess, setPublishSuccess] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   const previews = useMemo(
     () => form.images.map((file) => ({ file, url: URL.createObjectURL(file) })),
@@ -92,12 +97,23 @@ export default function SellPage() {
     return nextErrors;
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const nextErrors = validate();
     setErrors(nextErrors);
+    setStatusMessage(null);
+    setPublishSuccess(false);
+
     if (Object.keys(nextErrors).length === 0) {
-      setSubmitted(true);
+      setIsPublishing(true);
+      const result = await publishBook(form);
+      setStatusMessage(result.message);
+      setPublishSuccess(result.success);
+      setIsPublishing(false);
+
+      if (result.success) {
+        router.push("/dashboard");
+      }
     }
   };
 
@@ -417,18 +433,18 @@ export default function SellPage() {
                       Ready to publish? Review the preview before posting your listing.
                     </p>
                   </div>
-                  <Button type="submit" className="w-full sm:w-auto px-8 py-4">
-                    Publish Book
+                  <Button type="submit" disabled={isPublishing} className="w-full sm:w-auto px-8 py-4">
+                    {isPublishing ? "Publishing..." : "Publish Book"}
                   </Button>
                 </div>
 
-                {submitted ? (
+                {statusMessage ? (
                   <motion.div
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="rounded-[1.75rem] border border-emerald-500/25 bg-emerald-500/10 p-5 text-sm text-emerald-200"
+                    className={`rounded-[1.75rem] border px-5 py-5 text-sm ${publishSuccess ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-200" : "border-rose-500/25 bg-rose-500/10 text-rose-200"}`}
                   >
-                    Your book listing is ready to publish. This is a preview state until backend integration is added.
+                    {statusMessage}
                   </motion.div>
                 ) : null}
               </form>
