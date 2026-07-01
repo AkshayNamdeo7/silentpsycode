@@ -54,7 +54,7 @@ export default function RegisterPage() {
       setStatusMessage(result.message ?? "Registration request accepted.");
       setSubmitted(result.success);
 
-      if (result.success) {
+      if (result.success && !result.needsConfirmation) {
         router.push("/dashboard");
       }
     } else {

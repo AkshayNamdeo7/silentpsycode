@@ -1,14 +1,16 @@
 ﻿"use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, LayoutDashboard, LogOut, Menu, PlusCircle, Settings, BookOpen } from "lucide-react";
 import { motion } from "framer-motion";
 import Button from "@/components/ui/button";
-import { signOut } from "@/lib/auth";
+import { getCurrentAuthContext, signOut } from "@/lib/auth";
 import { supabase } from "@/lib/supabase";
 
 export default function Navbar() {
+  const router = useRouter();
   const [session, setSession] = useState<Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"] | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -17,9 +19,28 @@ export default function Navbar() {
     let active = true;
 
     const loadSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      if (active) {
-        setSession(data.session);
+      const authContext = await getCurrentAuthContext();
+      if (!active) return;
+
+      if (authContext.userId) {
+        setSession({
+          access_token: "demo-token",
+          refresh_token: "demo-refresh-token",
+          expires_in: 3600,
+          token_type: "bearer",
+          user: {
+            id: authContext.userId,
+            app_metadata: {},
+            aud: "authenticated",
+            created_at: new Date().toISOString(),
+            email: authContext.email ?? undefined,
+            user_metadata: {
+              full_name: authContext.fullName ?? undefined,
+            },
+          },
+        } as unknown as Awaited<ReturnType<typeof supabase.auth.getSession>>["data"]["session"]);
+      } else {
+        setSession(null);
       }
     };
 
@@ -49,6 +70,7 @@ export default function Navbar() {
     await signOut();
     setMenuOpen(false);
     setMobileMenuOpen(false);
+    router.push("/");
   };
 
   return (

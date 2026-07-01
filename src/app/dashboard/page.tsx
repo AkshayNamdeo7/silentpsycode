@@ -163,7 +163,7 @@ export default function DashboardPage() {
                   author={book.author}
                   price={`₹${book.selling_price}`}
                   status={book.status}
-                  badge={book.is_draft ? "Draft" : book.status === "sold" ? "Sold" : "Live"}
+                  badge={book.status === "draft" ? "Draft" : book.status === "sold" ? "Sold" : "Live"}
                   details={`${book.category} · ${new Date(book.created_at).toLocaleDateString()}`}
                   action={
                     <div className="flex flex-wrap gap-3">
@@ -194,7 +194,7 @@ export default function DashboardPage() {
         <div className="space-y-6 rounded-[2rem] border border-white/10 bg-slate-950/95 p-8 shadow-[0_35px_90px_-55px_rgba(15,23,42,0.75)]">
           <div className="rounded-[1.75rem] border border-white/10 bg-slate-900/90 p-6">
             <p className="text-sm uppercase tracking-[0.28em] text-slate-400">Listing health</p>
-            <p className="mt-4 text-3xl font-semibold text-white">8 live titles</p>
+            <p className="mt-4 text-3xl font-semibold text-white">{counts.active} live titles</p>
             <p className="mt-3 text-sm leading-7 text-slate-400">
               Keep your catalog fresh and responsive with consistent pricing, cover updates, and featured placement.
             </p>
