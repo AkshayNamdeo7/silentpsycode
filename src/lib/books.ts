@@ -445,22 +445,60 @@ export async function fetchBooks(filters: BookFilters = {}) {
 }
 
 export async function fetchBookById(bookId: string) {
+  // Demo books (published without Supabase)
+  const demoBook = readDemoBooks().find((book) => book.id === bookId);
+
+  if (demoBook) {
+    return {
+      book: {
+        ...demoBook,
+        images: [],
+        seller: {
+          full_name: demoBook.seller_name ?? "Student Seller",
+          phone: demoBook.seller_phone ?? null,
+          college: demoBook.college ?? null,
+          city: demoBook.city ?? null,
+        },
+      } as BookWithImages,
+      error: null,
+    };
+  }
+
+  // Built-in demo books
+  const fallbackBook = fallbackBooks.find((book) => book.id === bookId);
+  if (fallbackBook) {
+    return {
+      book: fallbackBook,
+      error: null,
+    };
+  }
+
   if (!isSupabaseClientConfigured) {
-    return { book: null as BookWithImages | null, error: null };
+    return {
+      book: null,
+      error: null,
+    };
   }
 
   const { data, error } = await supabase
     .from("books")
-    .select(
-      `id,title,author,selling_price,original_price,condition,category,subject,description,college,city,created_at,status,seller_id,images:book_images(image_url,display_order),seller:profiles(full_name,phone,college,city)`
-    )
+    .select(`
+      *,
+      images:book_images(*),
+      seller:profiles(*)
+    `)
     .eq("id", bookId)
     .single();
 
   if (error) {
-    const fallbackBook = fallbackBooks.find((book) => book.id === bookId);
-    return { book: fallbackBook ?? null, error: null };
+    return {
+      book: null,
+      error,
+    };
   }
 
-  return { book: (data as unknown) as BookWithImages | null, error };
+  return {
+    book: data as BookWithImages,
+    error: null,
+  };
 }

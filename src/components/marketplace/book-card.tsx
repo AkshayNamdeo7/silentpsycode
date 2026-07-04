@@ -85,9 +85,12 @@ export default function BookCard({ book }: BookCardProps) {
           </div>
 
           <div className="mt-6">
-            <Button asChild className="w-full">
-              <Link href={`/books/${book.id}`}>View Details</Link>
-            </Button>
+           <Link
+  href={`/books/${book.id}`}
+  className="block w-full rounded-full bg-blue-600 py-3 text-center font-semibold text-white hover:bg-blue-700"
+>
+  View Details
+</Link>
           </div>
         </div>
       </div>
