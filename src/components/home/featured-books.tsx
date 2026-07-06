@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import Link from "next/link";
 import { motion } from "framer-motion";
 import Button from "@/components/ui/button";
 
@@ -29,7 +30,7 @@ export default function FeaturedBooks() {
   ];
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-24">
+    <section id="books" className="mx-auto max-w-7xl px-6 py-24">
       <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-sm uppercase tracking-[0.28em] text-sky-300/80">Featured books</p>
@@ -68,7 +69,7 @@ export default function FeaturedBooks() {
             <p className="mt-3 text-sm text-slate-400">{book.author}</p>
             <p className="mt-6 text-sm leading-7 text-slate-300">{book.description}</p>
 
-            <Button className="mt-8 w-full justify-center">View details</Button>
+            <Button asChild className="mt-8 w-full justify-center"><Link href="/books">View details</Link></Button>
           </motion.article>
         ))}
       </div>

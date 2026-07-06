@@ -19,7 +19,7 @@ const faqs = [
 
 export default function FAQ() {
   return (
-    <section className="mx-auto max-w-7xl px-6 py-20">
+    <section id="faq" className="mx-auto max-w-7xl px-6 py-20">
       <SectionTitle
         eyebrow="FAQ"
         title="Questions answered for premium book lovers."

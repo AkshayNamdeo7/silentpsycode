@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Mail } from "lucide-react";
 import Link from "next/link";
@@ -15,11 +15,14 @@ import { signInWithEmail } from "@/lib/auth";
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  useEffect(() => {
+    document.title = "Sign In | Silent Psycode";
+  }, []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState(false);
 
   const validate = () => {
     const nextErrors: Record<string, string> = {};
@@ -44,7 +47,6 @@ function LoginForm() {
     if (Object.keys(nextErrors).length === 0) {
       const result = await signInWithEmail(email, password);
       setStatusMessage(result.message ?? "Login request accepted.");
-      setSubmitted(result.success);
 
       if (result.success) {
         const redirectTo = searchParams?.get("redirect") ?? "/dashboard";
@@ -52,7 +54,6 @@ function LoginForm() {
       }
     } else {
       setStatusMessage(null);
-      setSubmitted(false);
     }
   };
 

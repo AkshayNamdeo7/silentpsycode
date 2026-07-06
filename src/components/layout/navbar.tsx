@@ -7,7 +7,8 @@ import { ChevronDown, LayoutDashboard, LogOut, Menu, PlusCircle, Settings, BookO
 import { motion } from "framer-motion";
 import Button from "@/components/ui/button";
 import { getCurrentAuthContext, signOut } from "@/lib/auth";
-import { supabase } from "@/lib/supabase";
+import { isSupabaseClientConfigured, supabase } from "@/lib/supabase";
+import { setAuthCookie, clearAuthCookie } from "@/lib/supabase/middleware";
 
 export default function Navbar() {
   const router = useRouter();
@@ -46,13 +47,20 @@ export default function Navbar() {
 
     void loadSession();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((_event, currentSession) => {
-      setSession(currentSession);
-    });
+    const authListener = isSupabaseClientConfigured
+      ? supabase.auth.onAuthStateChange((_event, currentSession) => {
+          setSession(currentSession);
+          if (currentSession) {
+            setAuthCookie();
+          } else {
+            clearAuthCookie();
+          }
+        })
+      : { data: { subscription: { unsubscribe: () => {} } } };
 
     return () => {
       active = false;
-      authListener.subscription.unsubscribe();
+      authListener.data.subscription.unsubscribe();
     };
   }, []);
 

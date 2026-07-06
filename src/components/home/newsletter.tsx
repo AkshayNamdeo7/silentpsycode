@@ -1,8 +1,20 @@
 "use client";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Button from "@/components/ui/button";
 
 export default function Newsletter() {
+  const [email, setEmail] = useState("");
+  const [subscribed, setSubscribed] = useState(false);
+
+  const handleSubscribe = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (email.trim()) {
+      setSubscribed(true);
+      setEmail("");
+    }
+  };
+
   return (
     <section className="mx-auto max-w-7xl px-6 py-20">
       <div className="rounded-[2rem] overflow-hidden border border-white/10 bg-gradient-to-r from-slate-950/95 via-slate-900/90 to-slate-950/95 p-8 shadow-[0_0_120px_-40px_rgba(14,165,233,0.2)] sm:p-12">
@@ -18,6 +30,7 @@ export default function Newsletter() {
           </div>
 
           <motion.form
+            onSubmit={handleSubscribe}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.4 }}
@@ -30,10 +43,16 @@ export default function Newsletter() {
             <input
               id="newsletter-email"
               type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
               placeholder="you@example.com"
               className="w-full rounded-3xl border border-slate-800 bg-slate-900 px-4 py-3 text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
             />
-            <Button type="submit" className="w-full">Subscribe now</Button>
+            {subscribed ? (
+              <p className="text-sm text-emerald-400">Thanks for subscribing!</p>
+            ) : (
+              <Button type="submit" className="w-full">Subscribe now</Button>
+            )}
           </motion.form>
         </div>
       </div>

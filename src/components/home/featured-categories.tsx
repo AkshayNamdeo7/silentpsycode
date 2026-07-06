@@ -11,7 +11,7 @@ const categories = [
 
 export default function FeaturedCategories() {
   return (
-    <section className="mx-auto max-w-7xl px-6 py-20">
+    <section id="categories" className="mx-auto max-w-7xl px-6 py-20">
       <SectionTitle
         eyebrow="Featured Categories"
         title="Discover curated reading paths for every mood."

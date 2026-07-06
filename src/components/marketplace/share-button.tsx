@@ -25,14 +25,14 @@ export default function ShareButton({ url, className }: ShareButtonProps) {
       return;
     }
 
-    if (typeof navigator !== "undefined" && "clipboard" in navigator) {
-      try {
-        const clipboard = (navigator as any).clipboard;
+    try {
+      const clipboard = (navigator as Navigator & { clipboard: Clipboard }).clipboard;
+      if (clipboard) {
         await clipboard.writeText(resolvedUrl);
         setShared(true);
-      } catch {
-        setShared(false);
       }
+    } catch {
+      setShared(false);
     }
   };
 

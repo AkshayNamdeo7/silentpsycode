@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen, Home, LayoutDashboard, Users, Settings, X } from "lucide-react";
+import { BookOpen, Heart, Home, LayoutDashboard, Users, Settings, X } from "lucide-react";
 
 const navItems = [
   { label: "Overview", icon: LayoutDashboard, href: "/dashboard#overview" },
   { label: "My Books", icon: BookOpen, href: "/dashboard#listings" },
+  { label: "Favorites", icon: Heart, href: "/dashboard/favorites" },
   { label: "Orders", icon: Home, href: "/dashboard#orders" },
   { label: "Community", icon: Users, href: "/dashboard#community" },
   { label: "Settings", icon: Settings, href: "/dashboard#settings" },
@@ -64,7 +65,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           <div className="mt-10 rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-5">
             <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Quick action</p>
             <Link
-              href="/dashboard"
+              href="/sell"
               className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-sky-500 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
             >
               Sell a Book

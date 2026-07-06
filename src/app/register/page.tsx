@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Mail } from "lucide-react";
 import Link from "next/link";
@@ -14,13 +14,17 @@ import { signUpWithEmail } from "@/lib/auth";
 
 export default function RegisterPage() {
   const router = useRouter();
+
+  useEffect(() => {
+    document.title = "Create Account | Silent Psycode";
+  }, []);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState(false);
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
 
   const validate = () => {
     const nextErrors: Record<string, string> = {};
@@ -52,14 +56,13 @@ export default function RegisterPage() {
     if (Object.keys(nextErrors).length === 0) {
       const result = await signUpWithEmail(name, email, password);
       setStatusMessage(result.message ?? "Registration request accepted.");
-      setSubmitted(result.success);
+      setNeedsConfirmation(result.needsConfirmation ?? false);
 
       if (result.success && !result.needsConfirmation) {
         router.push("/dashboard");
       }
     } else {
       setStatusMessage(null);
-      setSubmitted(false);
     }
   };
 
@@ -152,7 +155,12 @@ export default function RegisterPage() {
                 Create account
               </Button>
 
-              {statusMessage ? (
+              {needsConfirmation ? (
+                <div className="rounded-3xl border border-amber-500/20 bg-amber-500/10 px-4 py-4 text-sm text-amber-200">
+                  <p className="font-semibold">Check your email</p>
+                  <p className="mt-2 text-amber-300/80">{statusMessage}</p>
+                </div>
+              ) : statusMessage ? (
                 <p className="rounded-3xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
                   {statusMessage}
                 </p>

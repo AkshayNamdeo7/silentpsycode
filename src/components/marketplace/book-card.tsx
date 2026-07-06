@@ -7,7 +7,6 @@ import { MapPin, Tag } from "lucide-react";
 import type { BookWithImages } from "@/lib/books";
 import FavoriteButton from "./favorite-button";
 import ShareButton from "./share-button";
-import Button from "@/components/ui/button";
 
 interface BookCardProps {
   book: BookWithImages;

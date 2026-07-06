@@ -166,6 +166,18 @@ export async function signUpWithEmail(name: string, email: string, password: str
         needsConfirmation: false,
       };
     }
+
+    if (!error && !data.session) {
+      return {
+        success: true,
+        message: "Check your email for a confirmation link to complete registration.",
+        needsConfirmation: true,
+      };
+    }
+
+    if (error) {
+      return { success: false, message: error.message };
+    }
   }
 
   const demoUser: DemoUser = {

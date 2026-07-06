@@ -1,6 +1,8 @@
 ﻿"use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import Button from "@/components/ui/button";
 
@@ -34,6 +36,19 @@ const stats = [
 ];
 
 export default function Hero() {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const q = searchQuery.trim();
+    if (q) {
+      router.push(`/books?search=${encodeURIComponent(q)}`);
+    } else {
+      router.push("/books");
+    }
+  };
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 22 }}
@@ -64,17 +79,19 @@ export default function Hero() {
               transition={{ duration: 0.55, delay: 0.1, ease: "easeOut" }}
               className="mx-auto max-w-3xl"
             >
-              <div className="rounded-full border border-white/10 bg-slate-900/90 px-5 py-4 shadow-[0_30px_80px_-40px_rgba(15,23,42,0.75)] sm:px-6">
+              <form onSubmit={handleSearch} className="rounded-full border border-white/10 bg-slate-900/90 px-5 py-4 shadow-[0_30px_80px_-40px_rgba(15,23,42,0.75)] sm:px-6">
                 <label htmlFor="search" className="sr-only">
                   Search by book name, author, subject or ISBN
                 </label>
                 <input
                   id="search"
                   type="search"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
                   placeholder="Search by book name, author, subject or ISBN..."
                   className="w-full bg-transparent text-white placeholder:text-slate-500 focus:outline-none"
                 />
-              </div>
+              </form>
             </motion.div>
 
             <motion.div
@@ -83,11 +100,11 @@ export default function Hero() {
               transition={{ duration: 0.55, delay: 0.15, ease: "easeOut" }}
               className="mx-auto flex max-w-3xl flex-col gap-4 sm:flex-row sm:justify-center"
             >
-              <Button className="w-full sm:w-auto px-8 py-4 text-base">
-                📚 Buy Books
+              <Button asChild className="w-full sm:w-auto px-8 py-4 text-base">
+                <Link href="/books">Buy Books</Link>
               </Button>
               <Button asChild variant="secondary" className="w-full sm:w-auto px-8 py-4 text-base">
-                <Link href="/sell">💰 Sell Your Books</Link>
+                <Link href="/sell">Sell Your Books</Link>
               </Button>
             </motion.div>
 

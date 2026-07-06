@@ -3,13 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Info, MapPin, ShieldCheck, Sparkles } from "lucide-react";
+import { ShieldCheck, Sparkles } from "lucide-react";
 import Button from "@/components/ui/button";
 import Dropzone from "@/components/ui/dropzone";
 import Input from "@/components/ui/input";
 import Select from "@/components/ui/select";
 import Textarea from "@/components/ui/textarea";
-import { publishBook } from "@/lib/books";
+import { publishBook, updateBook, fetchBookById } from "@/lib/books";
 
 const categories = [
   "Engineering",
@@ -48,11 +48,50 @@ const initialState = {
 
 export default function SellPage() {
   const router = useRouter();
+
+  useEffect(() => {
+    document.title = "Sell a Book | Silent Psycode";
+  }, []);
+
+  const [editId] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return new URLSearchParams(window.location.search).get("id") || null;
+  });
   const [form, setForm] = useState(initialState);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [publishSuccess, setPublishSuccess] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+
+  useEffect(() => {
+    if (!editId) return;
+    fetchBookById(editId).then((res) => {
+      if (res.book) {
+        const b = res.book;
+        setForm({
+          images: [],
+          title: b.title,
+          author: b.author,
+          sellerName: b.seller_name ?? "",
+          isbn: "",
+          category: b.category,
+          subject: b.subject,
+          condition: b.condition ?? "Good",
+          sellingPrice: b.selling_price.toString(),
+          originalPrice: b.original_price?.toString() ?? "",
+          description: "",
+          college: b.college ?? "",
+          branch: b.branch ?? "",
+          semester: b.semester ?? "",
+          city: b.city ?? "",
+          sellerPhone: b.seller_phone ?? "",
+          whatsappNumber: b.whatsapp_number ?? "",
+          email: b.contact_email ?? "",
+          contactPreference: b.contact_preference ?? "Email",
+        });
+      }
+    });
+  }, [editId]);
 
   const previews = useMemo(
     () => form.images.map((file) => ({ file, url: URL.createObjectURL(file) })),
@@ -73,7 +112,7 @@ export default function SellPage() {
   const validate = () => {
     const nextErrors: Record<string, string> = {};
 
-    if (form.images.length === 0) nextErrors.images = "Add at least one book image.";
+    if (!editId && form.images.length === 0) nextErrors.images = "Add at least one book image.";
     if (!form.title.trim()) nextErrors.title = "Enter a book title.";
     if (!form.author.trim()) nextErrors.author = "Enter the author name.";
     if (!form.sellerName.trim()) nextErrors.sellerName = "Enter your name.";
@@ -106,7 +145,7 @@ export default function SellPage() {
 
     if (Object.keys(nextErrors).length === 0) {
       setIsPublishing(true);
-      const result = await publishBook(form);
+      const result = editId ? await updateBook(editId, form) : await publishBook(form);
       setStatusMessage(result.message);
       setPublishSuccess(result.success);
       setIsPublishing(false);

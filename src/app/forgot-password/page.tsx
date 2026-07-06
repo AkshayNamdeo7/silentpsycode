@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import AuthCard from "@/components/auth/auth-card";
@@ -9,10 +9,13 @@ import Input from "@/components/ui/input";
 import { sendPasswordResetEmail } from "@/lib/auth";
 
 export default function ForgotPasswordPage() {
+  useEffect(() => {
+    document.title = "Reset Password | Silent Psycode";
+  }, []);
+
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState(false);
 
   const validate = () => {
     const nextErrors: Record<string, string> = {};
@@ -32,10 +35,8 @@ export default function ForgotPasswordPage() {
     if (Object.keys(nextErrors).length === 0) {
       const result = await sendPasswordResetEmail(email);
       setStatusMessage(result.message ?? "Password reset request accepted.");
-      setSubmitted(result.success);
     } else {
       setStatusMessage(null);
-      setSubmitted(false);
     }
   };
 

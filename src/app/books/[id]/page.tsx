@@ -32,6 +32,7 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
       }
 
       setBook(fetchedBook);
+      document.title = `${fetchedBook.title} | Silent Psycode`;
       setLoading(false);
     };
 
@@ -109,6 +110,7 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
                   src={mainImage}
                   alt={book.title}
                   className="h-[520px] w-full object-cover"
+                  loading="lazy"
                   onError={() => setMainImageError(true)}
                 />
               ) : (

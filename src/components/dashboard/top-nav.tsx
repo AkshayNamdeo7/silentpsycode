@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Menu, X, ChevronDown, Search, Bell } from "lucide-react";
-import { signOut } from "@/lib/auth";
+import { Menu, ChevronDown, Search, Bell } from "lucide-react";
+import { getCurrentAuthContext, signOut } from "@/lib/auth";
 
 interface TopNavProps {
   onToggleSidebar: () => void;
@@ -14,6 +14,26 @@ interface TopNavProps {
 export default function TopNav({ onToggleSidebar }: TopNavProps) {
   const router = useRouter();
   const [profileOpen, setProfileOpen] = useState(false);
+  const [fullName, setFullName] = useState("User");
+
+  useEffect(() => {
+    const loadSession = async () => {
+      const authContext = await getCurrentAuthContext();
+      if (authContext.fullName) {
+        setFullName(authContext.fullName);
+      }
+    };
+    void loadSession();
+  }, []);
+
+  const initials = useMemo(() => {
+    return fullName
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase();
+  }, [fullName]);
 
   const handleSignOut = async () => {
     setProfileOpen(false);
@@ -64,9 +84,9 @@ export default function TopNav({ onToggleSidebar }: TopNavProps) {
             onClick={() => setProfileOpen((open) => !open)}
             className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-slate-950/90 px-4 py-3 shadow-sm shadow-slate-950/20 transition hover:bg-slate-900"
           >
-            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-sky-500/10 text-sky-300">A</span>
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-sky-500/10 text-sm font-semibold text-sky-300">{initials}</span>
             <div className="hidden min-w-[120px] text-left sm:block">
-              <p className="text-sm font-semibold text-white">Arjun</p>
+              <p className="text-sm font-semibold text-white">{fullName}</p>
               <p className="text-xs text-slate-400">Seller</p>
             </div>
             <ChevronDown className="h-4 w-4 text-slate-400" />
@@ -81,12 +101,12 @@ export default function TopNav({ onToggleSidebar }: TopNavProps) {
               className="absolute right-0 z-20 mt-3 w-56 rounded-[1.75rem] border border-white/10 bg-slate-950/95 p-4 shadow-[0_30px_90px_-50px_rgba(0,0,0,0.5)]"
             >
               <div className="space-y-2">
-                <button className="w-full rounded-3xl px-4 py-3 text-left text-sm text-slate-200 transition hover:bg-slate-900">
+                <Link href="/dashboard#settings" className="block w-full rounded-3xl px-4 py-3 text-left text-sm text-slate-200 transition hover:bg-slate-900" onClick={() => setProfileOpen(false)}>
                   Profile
-                </button>
-                <button className="w-full rounded-3xl px-4 py-3 text-left text-sm text-slate-200 transition hover:bg-slate-900">
+                </Link>
+                <Link href="/dashboard#settings" className="block w-full rounded-3xl px-4 py-3 text-left text-sm text-slate-200 transition hover:bg-slate-900" onClick={() => setProfileOpen(false)}>
                   Billing
-                </button>
+                </Link>
                 <button
                   className="w-full rounded-3xl px-4 py-3 text-left text-sm text-slate-200 transition hover:bg-slate-900"
                   onClick={handleSignOut}

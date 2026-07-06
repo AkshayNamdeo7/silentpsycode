@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { motion } from "framer-motion";
 import SectionTitle from "@/components/common/section-title";
 import Button from "@/components/ui/button";
@@ -64,7 +65,7 @@ export default function BestSellers() {
 
             <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <span className="text-2xl font-bold text-white">{book.price}</span>
-              <Button size="sm" className="w-full sm:w-auto">Buy Now</Button>
+              <Button asChild size="sm" className="w-full sm:w-auto"><Link href="/books">Buy Now</Link></Button>
             </div>
           </motion.article>
         ))}

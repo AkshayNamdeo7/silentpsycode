@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/navbar";
 import SectionTitle from "@/components/common/section-title";
 import BookFilters from "@/components/marketplace/book-filters";
@@ -23,13 +23,21 @@ const defaultFilters: FilterType = {
   sort: "newest",
 };
 
-export default function BrowseBooksPage() {
-  const [filters, setFilters] = useState(defaultFilters);
+function BooksPageContent() {
+  const searchParams = useSearchParams();
+  const [filters, setFilters] = useState<FilterType>(() => {
+    const initialSearch = searchParams?.get("search") ?? "";
+    return { ...defaultFilters, search: initialSearch };
+  });
   const [books, setBooks] = useState<BookWithImages[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const loadBooks = async (currentFilters: FilterType) => {
+  useEffect(() => {
+    document.title = "Browse Books | Silent Psycode";
+  }, []);
+
+  const loadBooks = useCallback(async (currentFilters: FilterType) => {
     setLoading(true);
     setError(null);
     const { books: fetchedBooks, error: fetchError } = await fetchBooks(currentFilters);
@@ -40,11 +48,14 @@ export default function BrowseBooksPage() {
       setBooks(fetchedBooks);
     }
     setLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
-    void loadBooks(filters);
-  }, [filters]);
+    const handler = setTimeout(() => {
+      void loadBooks(filters);
+    }, 0);
+    return () => clearTimeout(handler);
+  }, [filters, loadBooks]);
 
   const sectionDescription = useMemo(() => {
     if (error) return "We hit a problem while loading books. Try again or refine your filters.";
@@ -107,5 +118,13 @@ export default function BrowseBooksPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function BrowseBooksPage() {
+  return (
+    <Suspense fallback={null}>
+      <BooksPageContent />
+    </Suspense>
   );
 }

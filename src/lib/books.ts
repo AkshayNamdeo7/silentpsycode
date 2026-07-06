@@ -1,6 +1,15 @@
 import { isSupabaseClientConfigured, supabase } from "@/lib/supabase";
 import { getCurrentAuthContext } from "@/lib/auth";
 
+function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
 export interface BookForm {
   images: File[];
   title: string;
@@ -38,6 +47,12 @@ export interface BookRecord {
   status: string;
   category: string;
   subject: string;
+  condition?: string;
+  description?: string | null;
+  college?: string | null;
+  branch?: string | null;
+  semester?: string | null;
+  city?: string | null;
   created_at: string;
   seller_name?: string | null;
   seller_phone?: string | null;
@@ -184,6 +199,14 @@ export async function publishBook(form: BookForm) {
 
   if (authContext.isDemo) {
     const demoBooks = readDemoBooks();
+    const imageDataUrls = await Promise.all(
+      form.images.slice(0, 2).map((file) => fileToDataUrl(file))
+    );
+    const demoImages = imageDataUrls.map((url, index) => ({
+      id: crypto.randomUUID(),
+      image_url: url,
+      display_order: index + 1,
+    }));
     const demoBook = {
       id: crypto.randomUUID(),
       seller_id: userId,
@@ -207,7 +230,8 @@ export async function publishBook(form: BookForm) {
       city: form.city.trim(),
       status: "active",
       created_at: new Date().toISOString(),
-    } as BookRecord & { seller_id: string };
+      demo_images: demoImages,
+    } as BookRecord & { seller_id: string; demo_images: BookImageRecord[] };
 
     writeDemoBooks([demoBook, ...demoBooks]);
     return { success: true, message: "Book published successfully." };
@@ -220,10 +244,7 @@ export async function publishBook(form: BookForm) {
     };
   }
 
-  const {
-    data: { session },
-    error: sessionError,
-  } = await supabase.auth.getSession();
+  const { error: sessionError } = await supabase.auth.getSession();
 
   if (sessionError) {
     return { success: false, message: sessionError.message };
@@ -310,6 +331,114 @@ export async function publishBook(form: BookForm) {
   }
 }
 
+export async function updateBook(bookId: string, form: BookForm) {
+  const authContext = await getCurrentAuthContext();
+  const userId = authContext.userId;
+  if (!userId) {
+    return { success: false, message: "Please sign in." };
+  }
+
+  if (authContext.isDemo) {
+    const demoBooks = readDemoBooks();
+    const index = demoBooks.findIndex((book) => book.id === bookId);
+    if (index === -1) {
+      return { success: false, message: "Book not found." };
+    }
+    const existing = demoBooks[index];
+    const imageDataUrls = await Promise.all(
+      form.images.slice(0, 2).map((file) => fileToDataUrl(file))
+    );
+    const demoImages = imageDataUrls.map((url, idx) => ({
+      id: crypto.randomUUID(),
+      image_url: url,
+      display_order: idx + 1,
+    }));
+
+    demoBooks[index] = {
+      ...existing,
+      title: form.title.trim(),
+      author: form.author.trim(),
+      isbn: form.isbn?.trim() || null,
+      category: form.category,
+      subject: form.subject.trim(),
+      condition: form.condition,
+      selling_price: Number(form.sellingPrice) || 0,
+      original_price: form.originalPrice ? Number(form.originalPrice) : null,
+      description: buildBookDescription(form),
+      seller_name: form.sellerName.trim() || null,
+      seller_phone: form.sellerPhone.trim() || null,
+      whatsapp_number: form.whatsappNumber.trim() || null,
+      contact_email: form.email.trim() || null,
+      contact_preference: form.contactPreference.trim() || null,
+      college: form.college.trim(),
+      branch: form.branch.trim(),
+      semester: form.semester.trim(),
+      city: form.city.trim(),
+      demo_images: demoImages.length > 0 ? demoImages : (existing as BookRecord & { seller_id: string; demo_images?: BookImageRecord[] }).demo_images,
+    } as BookRecord & { seller_id: string; demo_images: BookImageRecord[] };
+
+    writeDemoBooks(demoBooks);
+    return { success: true, message: "Book updated." };
+  }
+
+  if (!isSupabaseClientConfigured) {
+    return { success: false, message: "Supabase is not configured." };
+  }
+
+  const bookPayload = {
+    title: form.title.trim(),
+    author: form.author.trim(),
+    isbn: form.isbn?.trim() || null,
+    category: form.category,
+    subject: form.subject.trim(),
+    condition: form.condition,
+    selling_price: Number(form.sellingPrice) || 0,
+    original_price: form.originalPrice ? Number(form.originalPrice) : null,
+    description: buildBookDescription(form),
+    seller_name: form.sellerName.trim() || null,
+    seller_phone: form.sellerPhone.trim() || null,
+    whatsapp_number: form.whatsappNumber.trim() || null,
+    contact_email: form.email.trim() || null,
+    contact_preference: form.contactPreference.trim() || null,
+    college: form.college.trim(),
+    branch: form.branch.trim(),
+    semester: form.semester.trim(),
+    city: form.city.trim(),
+  };
+
+  const { error } = await supabase.from("books").update(bookPayload).eq("id", bookId).eq("seller_id", userId);
+  if (error) {
+    return { success: false, message: error.message };
+  }
+
+  return { success: true, message: "Book updated." };
+}
+
+export async function deleteBook(bookId: string) {
+  const authContext = await getCurrentAuthContext();
+  const userId = authContext.userId;
+  if (!userId) {
+    return { success: false, message: "Please sign in." };
+  }
+
+  if (authContext.isDemo) {
+    const demoBooks = readDemoBooks().filter((book) => book.id !== bookId);
+    writeDemoBooks(demoBooks);
+    return { success: true, message: "Book deleted." };
+  }
+
+  if (!isSupabaseClientConfigured) {
+    return { success: false, message: "Supabase is not configured." };
+  }
+
+  const { error } = await supabase.from("books").delete().eq("id", bookId).eq("seller_id", userId);
+  if (error) {
+    return { success: false, message: error.message };
+  }
+
+  return { success: true, message: "Book deleted." };
+}
+
 export async function getMyBooks() {
   const authContext = await getCurrentAuthContext();
   const userId = authContext.userId;
@@ -381,9 +510,23 @@ function applyFallbackFilters(books: BookWithImages[], filters: BookFilters) {
   });
 }
 
+function demoBookToBookWithImages(book: BookRecord & { seller_id: string; demo_images?: BookImageRecord[] }): BookWithImages {
+  return {
+    ...book,
+    images: book.demo_images ?? [],
+    seller: {
+      full_name: book.seller_name ?? null,
+      phone: book.seller_phone ?? null,
+      college: book.college ?? null,
+      city: book.city ?? null,
+    },
+  };
+}
+
 export async function fetchBooks(filters: BookFilters = {}) {
   if (!isSupabaseClientConfigured) {
-    return { books: applyFallbackFilters(fallbackBooks, filters), error: null };
+    const allLocal = [...readDemoBooks().map(demoBookToBookWithImages), ...fallbackBooks];
+    return { books: applyFallbackFilters(allLocal, filters), error: null };
   }
 
   let query = supabase
@@ -438,7 +581,7 @@ export async function fetchBooks(filters: BookFilters = {}) {
   }
 
   if (!books.length) {
-    return { books: applyFallbackFilters(fallbackBooks, filters), error: null };
+    return { books: [], error: null };
   }
 
   return { books, error };
@@ -450,16 +593,7 @@ export async function fetchBookById(bookId: string) {
 
   if (demoBook) {
     return {
-      book: {
-        ...demoBook,
-        images: [],
-        seller: {
-          full_name: demoBook.seller_name ?? "Student Seller",
-          phone: demoBook.seller_phone ?? null,
-          college: demoBook.college ?? null,
-          city: demoBook.city ?? null,
-        },
-      } as BookWithImages,
+      book: demoBookToBookWithImages(demoBook),
       error: null,
     };
   }
