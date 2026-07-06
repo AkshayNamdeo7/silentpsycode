@@ -65,11 +65,11 @@ export default function FavoritesPage() {
       </section>
 
       {loading ? (
-        <div className="rounded-[2rem] border border-white/10 bg-slate-950/90 p-10 text-center text-slate-400">
+        <div className="rounded-[2rem] border border-white/10 bg-slate-950/90 p-6 text-center text-slate-400 sm:p-10">
           Loading your wishlist...
         </div>
       ) : bookIds.length === 0 ? (
-        <div className="rounded-[2rem] border border-dashed border-white/10 bg-slate-950/90 p-10 text-center text-slate-400">
+        <div className="rounded-[2rem] border border-dashed border-white/10 bg-slate-950/90 p-6 text-center text-slate-400 sm:p-10">
           <p className="text-sm uppercase tracking-[0.32em] text-sky-300/80">Empty wishlist</p>
           <p className="mt-4 text-xl font-semibold text-white">No saved books yet</p>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-400">
@@ -82,7 +82,7 @@ export default function FavoritesPage() {
           </div>
         </div>
       ) : books.length === 0 ? (
-        <div className="rounded-[2rem] border border-dashed border-white/10 bg-slate-950/90 p-10 text-center text-slate-400">
+        <div className="rounded-[2rem] border border-dashed border-white/10 bg-slate-950/90 p-6 text-center text-slate-400 sm:p-10">
           <p className="text-sm uppercase tracking-[0.32em] text-sky-300/80">Unavailable</p>
           <p className="mt-4 text-xl font-semibold text-white">Some books are no longer available</p>
           <p className="mx-auto mt-3 max-w-xl text-sm leading-7 text-slate-400">

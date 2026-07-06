@@ -28,7 +28,7 @@ export default function BookCard({ book }: BookCardProps) {
       <div className="relative">
         <div className="relative overflow-hidden rounded-[2rem] bg-slate-900">
           {imageUrl && !imageError ? (
-            <div className="relative h-72 w-full">
+            <div className="relative h-48 w-full sm:h-72">
               <Image
                 src={imageUrl}
                 alt={book.title}
@@ -41,7 +41,7 @@ export default function BookCard({ book }: BookCardProps) {
               />
             </div>
           ) : (
-            <div className="flex h-72 items-center justify-center bg-slate-900 text-slate-500">No image available</div>
+            <div className="flex h-48 items-center justify-center bg-slate-900 text-slate-500 sm:h-72">No image available</div>
           )}
 
           <div className="absolute inset-x-0 top-4 flex items-start justify-between px-4">

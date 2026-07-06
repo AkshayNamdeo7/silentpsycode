@@ -81,7 +81,7 @@ export default function DashboardPage() {
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div>
             <p className="text-sm uppercase tracking-[0.3em] text-sky-300/80">Welcome back</p>
-            <h1 className="mt-3 text-3xl font-semibold text-white sm:text-4xl">
+            <h1 className="mt-3 text-3xl font-semibold text-white sm:text-4xl text-balance">
               Premium seller dashboard
             </h1>
             <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-400">

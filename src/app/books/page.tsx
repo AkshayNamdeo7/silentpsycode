@@ -82,8 +82,8 @@ function BooksPageContent() {
                 <p className="text-sm uppercase tracking-[0.32em] text-sky-300/80">Live listings</p>
                 <p className="mt-2 text-lg text-slate-300">Find your next read with search, filters, and premium book discovery.</p>
               </div>
-              <Link href="/sell">
-                <Button variant="secondary">Sell a book</Button>
+              <Link href="/sell" className="w-full sm:w-auto">
+                <Button variant="secondary" className="w-full sm:w-auto">Sell a book</Button>
               </Link>
             </div>
 

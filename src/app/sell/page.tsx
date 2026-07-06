@@ -166,7 +166,7 @@ export default function SellPage() {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="mx-auto max-w-7xl"
       >
-        <div className="rounded-[2.5rem] border border-white/10 bg-slate-950/95 p-10 shadow-[0_60px_160px_-90px_rgba(15,23,42,0.94)] sm:p-12">
+        <div className="rounded-[2.5rem] border border-white/10 bg-slate-950/95 p-6 shadow-[0_60px_160px_-90px_rgba(15,23,42,0.94)] sm:p-12">
           <div className="grid gap-6 lg:grid-cols-[1.55fr_0.95fr] lg:items-start">
             <div className="space-y-6">
               <div className="space-y-3">
@@ -174,7 +174,7 @@ export default function SellPage() {
                   <ShieldCheck className="h-4 w-4 text-sky-300" />
                   Sell a Book
                 </p>
-                <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+                <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl text-balance">
                   List your second-hand book in minutes.
                 </h1>
                 <p className="max-w-3xl text-base leading-8 text-slate-400 sm:text-lg">

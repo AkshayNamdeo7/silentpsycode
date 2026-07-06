@@ -58,14 +58,14 @@ export default function Hero() {
     >
       <div className="absolute inset-x-0 top-0 h-[420px] bg-gradient-to-b from-sky-500/15 via-transparent to-transparent" />
       <div className="mx-auto max-w-7xl">
-        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-slate-950/90 p-8 shadow-[0_60px_140px_-80px_rgba(15,23,42,0.9)] backdrop-blur-xl sm:p-12">
+        <div className="relative overflow-hidden rounded-[2.5rem] border border-white/10 bg-slate-950/90 p-6 shadow-[0_60px_140px_-80px_rgba(15,23,42,0.9)] backdrop-blur-xl sm:p-12">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(56,189,248,0.18),_transparent_28%)]" />
           <div className="relative space-y-10">
             <div className="mx-auto max-w-4xl text-center">
               <p className="text-sm uppercase tracking-[0.32em] text-sky-300/80">
                 Trusted student marketplace
               </p>
-              <h1 className="mt-6 text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl">
+              <h1 className="mt-6 text-4xl font-semibold tracking-tight text-white sm:text-5xl lg:text-6xl text-balance">
                 Buy & Sell Second-Hand Books at Student-Friendly Prices
               </h1>
               <p className="mx-auto mt-6 max-w-3xl text-lg leading-8 text-slate-300 sm:text-xl">

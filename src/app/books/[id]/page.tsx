@@ -89,7 +89,7 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-sm uppercase tracking-[0.32em] text-sky-300/80">Book details</p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl">{book.title}</h1>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-white sm:text-4xl text-balance">{book.title}</h1>
             <p className="mt-2 text-sm text-slate-400">{book.author}</p>
           </div>
 
@@ -109,12 +109,12 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
                 <img
                   src={mainImage}
                   alt={book.title}
-                  className="h-[520px] w-full object-cover"
+                  className="h-64 w-full object-cover sm:h-[520px]"
                   loading="lazy"
                   onError={() => setMainImageError(true)}
                 />
               ) : (
-                <div className="flex h-[520px] items-center justify-center bg-slate-900 text-slate-500">No image available</div>
+                <div className="flex h-64 items-center justify-center bg-slate-900 text-slate-500 sm:h-[520px]">No image available</div>
               )}
             </div>
 
