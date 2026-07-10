@@ -1,15 +1,6 @@
 import { isSupabaseClientConfigured, supabase } from "@/lib/supabase";
 import { getCurrentAuthContext } from "@/lib/auth";
 
-function fileToDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
-}
-
 export interface BookForm {
   images: File[];
   title: string;
@@ -30,11 +21,6 @@ export interface BookForm {
   whatsappNumber: string;
   email: string;
   contactPreference: string;
-  seller_name?: string | null;
-  seller_phone?: string | null;
-  whatsapp_number?: string | null;
-  contact_email?: string | null;
-  contact_preference?: string | null;
 }
 
 export interface BookRecord {
@@ -42,6 +28,7 @@ export interface BookRecord {
   seller_id?: string;
   title: string;
   author: string;
+  isbn?: string | null;
   selling_price: number;
   original_price: number | null;
   status: string;
@@ -75,11 +62,6 @@ export interface SellerProfile {
 }
 
 export interface BookWithImages extends BookRecord {
-  seller_id?: string;
-  condition?: string;
-  description?: string | null;
-  college?: string | null;
-  city?: string | null;
   images?: BookImageRecord[];
   seller?: SellerProfile | null;
 }
@@ -87,6 +69,7 @@ export interface BookWithImages extends BookRecord {
 export interface BookFilters {
   search?: string;
   category?: string;
+  subject?: string;
   condition?: string;
   minPrice?: number;
   maxPrice?: number;
@@ -94,84 +77,6 @@ export interface BookFilters {
   city?: string;
   sort?: "newest" | "lowest" | "highest";
 }
-
-const DEMO_BOOKS_STORAGE_KEY = "silentpsy-demo-books";
-
-function readDemoBooks(): Array<BookRecord & { seller_id: string }> {
-  if (typeof window === "undefined") return [];
-
-  try {
-    const raw = window.localStorage.getItem(DEMO_BOOKS_STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as Array<BookRecord & { seller_id: string }>) : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeDemoBooks(books: Array<BookRecord & { seller_id: string }>) {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(DEMO_BOOKS_STORAGE_KEY, JSON.stringify(books));
-}
-
-const fallbackBooks: BookWithImages[] = [
-  {
-    id: "demo-physics",
-    title: "Engineering Physics",
-    author: "Dr. Ananya Rao",
-    selling_price: 420,
-    original_price: 650,
-    status: "active",
-    category: "Engineering",
-    subject: "Physics",
-    description: "A well-kept engineering physics handbook with solved problems and clear diagrams for semester prep.",
-    college: "IIT Delhi",
-    city: "Delhi",
-    created_at: new Date("2025-06-22T10:00:00.000Z").toISOString(),
-    seller_name: "Ananya Rao",
-    seller_phone: "+91 9876543210",
-    contact_email: "ananya@example.com",
-    contact_preference: "WhatsApp",
-    images: [{ id: "demo-physics-1", image_url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='1000' viewBox='0 0 800 1000'%3E%3Crect width='800' height='1000' fill='%230f172a'/%3E%3Crect x='120' y='110' width='560' height='780' rx='32' fill='%231e293b'/%3E%3Ctext x='400' y='420' font-size='54' text-anchor='middle' fill='%23f8fafc' font-family='Arial'%3EEngineering%3C/text%3E%3Ctext x='400' y='500' font-size='54' text-anchor='middle' fill='%23f8fafc' font-family='Arial'%3EPhysics%3C/text%3E%3Ctext x='400' y='600' font-size='36' text-anchor='middle' fill='%2383c5ff' font-family='Arial'%3EDemo Listing%3C/text%3E%3C/svg%3E", display_order: 1 }],
-  },
-  {
-    id: "demo-algebra",
-    title: "Linear Algebra for Beginners",
-    author: "Ravi Menon",
-    selling_price: 310,
-    original_price: 499,
-    status: "active",
-    category: "Math",
-    subject: "Algebra",
-    description: "Clean notes and practice sets that help students build confidence before exams.",
-    college: "IIT Madras",
-    city: "Chennai",
-    created_at: new Date("2025-06-24T12:00:00.000Z").toISOString(),
-    seller_name: "Ravi Menon",
-    seller_phone: "+91 9123456789",
-    contact_email: "ravi@example.com",
-    contact_preference: "Phone",
-    images: [{ id: "demo-algebra-1", image_url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='1000' viewBox='0 0 800 1000'%3E%3Crect width='800' height='1000' fill='%230f172a'/%3E%3Crect x='120' y='110' width='560' height='780' rx='32' fill='%231e293b'/%3E%3Ctext x='400' y='420' font-size='54' text-anchor='middle' fill='%23f8fafc' font-family='Arial'%3ELinear%3C/text%3E%3Ctext x='400' y='500' font-size='54' text-anchor='middle' fill='%23f8fafc' font-family='Arial'%3EAlgebra%3C/text%3E%3Ctext x='400' y='600' font-size='36' text-anchor='middle' fill='%2383c5ff' font-family='Arial'%3EDemo Listing%3C/text%3E%3C/svg%3E", display_order: 1 }],
-  },
-  {
-    id: "demo-chem",
-    title: "Organic Chemistry Concepts",
-    author: "Megha Patel",
-    selling_price: 360,
-    original_price: 580,
-    status: "active",
-    category: "Medical",
-    subject: "Chemistry",
-    description: "A concise study companion with exam-focused chapter summaries and reaction maps.",
-    college: "AIIMS Delhi",
-    city: "Delhi",
-    created_at: new Date("2025-06-26T08:30:00.000Z").toISOString(),
-    seller_name: "Megha Patel",
-    seller_phone: "+91 9988776655",
-    contact_email: "megha@example.com",
-    contact_preference: "Email",
-    images: [{ id: "demo-chem-1", image_url: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='1000' viewBox='0 0 800 1000'%3E%3Crect width='800' height='1000' fill='%230f172a'/%3E%3Crect x='120' y='110' width='560' height='780' rx='32' fill='%231e293b'/%3E%3Ctext x='400' y='420' font-size='54' text-anchor='middle' fill='%23f8fafc' font-family='Arial'%3EOrganic%3C/text%3E%3Ctext x='400' y='500' font-size='54' text-anchor='middle' fill='%23f8fafc' font-family='Arial'%3EChemistry%3C/text%3E%3Ctext x='400' y='600' font-size='36' text-anchor='middle' fill='%2383c5ff' font-family='Arial'%3EDemo Listing%3C/text%3E%3C/svg%3E", display_order: 1 }],
-  },
-];
 
 function buildBookDescription(form: BookForm) {
   const details = [
@@ -181,10 +86,6 @@ function buildBookDescription(form: BookForm) {
     form.branch ? `Branch: ${form.branch.trim()}` : undefined,
     form.semester ? `Semester: ${form.semester.trim()}` : undefined,
     form.city ? `City: ${form.city.trim()}` : undefined,
-    form.sellerName ? `Seller: ${form.sellerName}` : undefined,
-    form.sellerPhone ? `Phone: ${form.sellerPhone}` : undefined,
-    form.email ? `Email: ${form.email}` : undefined,
-    form.contactPreference ? `Contact preference: ${form.contactPreference}` : undefined,
   ].filter((detail): detail is string => Boolean(detail));
 
   return details.join("\n\n");
@@ -195,46 +96,6 @@ export async function publishBook(form: BookForm) {
   const userId = authContext.userId;
   if (!userId) {
     return { success: false, message: "Please sign in before publishing a book." };
-  }
-
-  if (authContext.isDemo) {
-    const demoBooks = readDemoBooks();
-    const imageDataUrls = await Promise.all(
-      form.images.slice(0, 2).map((file) => fileToDataUrl(file))
-    );
-    const demoImages = imageDataUrls.map((url, index) => ({
-      id: crypto.randomUUID(),
-      image_url: url,
-      display_order: index + 1,
-    }));
-    const demoBook = {
-      id: crypto.randomUUID(),
-      seller_id: userId,
-      title: form.title.trim(),
-      author: form.author.trim(),
-      isbn: form.isbn?.trim() || null,
-      category: form.category,
-      subject: form.subject.trim(),
-      condition: form.condition,
-      selling_price: Number(form.sellingPrice) || 0,
-      original_price: form.originalPrice ? Number(form.originalPrice) : null,
-      description: buildBookDescription(form),
-      seller_name: form.sellerName.trim() || null,
-      seller_phone: form.sellerPhone.trim() || null,
-      whatsapp_number: form.whatsappNumber.trim() || null,
-      contact_email: form.email.trim() || null,
-      contact_preference: form.contactPreference.trim() || null,
-      college: form.college.trim(),
-      branch: form.branch.trim(),
-      semester: form.semester.trim(),
-      city: form.city.trim(),
-      status: "active",
-      created_at: new Date().toISOString(),
-      demo_images: demoImages,
-    } as BookRecord & { seller_id: string; demo_images: BookImageRecord[] };
-
-    writeDemoBooks([demoBook, ...demoBooks]);
-    return { success: true, message: "Book published successfully." };
   }
 
   if (!isSupabaseClientConfigured) {
@@ -296,39 +157,44 @@ export async function publishBook(form: BookForm) {
 
   const bookId = bookData.id;
 
-  try {
-    const imageUploads = await Promise.all(
-      form.images.map(async (file, index) => {
-        const safeFileName = `${crypto.randomUUID()}-${file.name}`;
-        const path = `books/${userId}/${bookId}/${safeFileName}`;
+  const uploadedPaths: string[] = [];
+  const imageUploads: Array<{ book_id: string; image_url: string; display_order: number }> = [];
 
-        const { error: uploadError } = await supabase.storage
-          .from("book-images")
-          .upload(path, file, { cacheControl: "3600", upsert: false });
+  for (let i = 0; i < form.images.length; i++) {
+    const file = form.images[i];
+    const safeFileName = `${crypto.randomUUID()}-${file.name}`;
+    const path = `books/${userId}/${bookId}/${safeFileName}`;
 
-        if (uploadError) {
-          throw uploadError;
-        }
+    const { error: uploadError } = await supabase.storage
+      .from("book-images")
+      .upload(path, file, { cacheControl: "3600", upsert: false });
 
-        const { data: publicUrlData } = supabase.storage.from("book-images").getPublicUrl(path);
-
-        return {
-          book_id: bookId,
-          image_url: publicUrlData.publicUrl,
-          display_order: index + 1,
-        };
-      })
-    );
-
-    const { error: imagesInsertError } = await supabase.from("book_images").insert(imageUploads);
-    if (imagesInsertError) {
-      return { success: false, message: imagesInsertError.message };
+    if (uploadError) {
+      for (const p of uploadedPaths) {
+        await supabase.storage.from("book-images").remove([p]).catch(() => {});
+      }
+      return { success: false, message: uploadError.message };
     }
 
-    return { success: true, message: "Book published successfully." };
-  } catch (error) {
-    return { success: false, message: (error as Error).message ?? "Failed to upload images." };
+    uploadedPaths.push(path);
+
+    const { data: publicUrlData } = supabase.storage.from("book-images").getPublicUrl(path);
+    imageUploads.push({
+      book_id: bookId,
+      image_url: publicUrlData.publicUrl,
+      display_order: i + 1,
+    });
   }
+
+  const { error: imagesInsertError } = await supabase.from("book_images").insert(imageUploads);
+  if (imagesInsertError) {
+    for (const p of uploadedPaths) {
+      await supabase.storage.from("book-images").remove([p]).catch(() => {});
+    }
+    return { success: false, message: imagesInsertError.message };
+  }
+
+  return { success: true, message: "Book published successfully." };
 }
 
 export async function updateBook(bookId: string, form: BookForm) {
@@ -336,49 +202,6 @@ export async function updateBook(bookId: string, form: BookForm) {
   const userId = authContext.userId;
   if (!userId) {
     return { success: false, message: "Please sign in." };
-  }
-
-  if (authContext.isDemo) {
-    const demoBooks = readDemoBooks();
-    const index = demoBooks.findIndex((book) => book.id === bookId);
-    if (index === -1) {
-      return { success: false, message: "Book not found." };
-    }
-    const existing = demoBooks[index];
-    const imageDataUrls = await Promise.all(
-      form.images.slice(0, 2).map((file) => fileToDataUrl(file))
-    );
-    const demoImages = imageDataUrls.map((url, idx) => ({
-      id: crypto.randomUUID(),
-      image_url: url,
-      display_order: idx + 1,
-    }));
-
-    demoBooks[index] = {
-      ...existing,
-      title: form.title.trim(),
-      author: form.author.trim(),
-      isbn: form.isbn?.trim() || null,
-      category: form.category,
-      subject: form.subject.trim(),
-      condition: form.condition,
-      selling_price: Number(form.sellingPrice) || 0,
-      original_price: form.originalPrice ? Number(form.originalPrice) : null,
-      description: buildBookDescription(form),
-      seller_name: form.sellerName.trim() || null,
-      seller_phone: form.sellerPhone.trim() || null,
-      whatsapp_number: form.whatsappNumber.trim() || null,
-      contact_email: form.email.trim() || null,
-      contact_preference: form.contactPreference.trim() || null,
-      college: form.college.trim(),
-      branch: form.branch.trim(),
-      semester: form.semester.trim(),
-      city: form.city.trim(),
-      demo_images: demoImages.length > 0 ? demoImages : (existing as BookRecord & { seller_id: string; demo_images?: BookImageRecord[] }).demo_images,
-    } as BookRecord & { seller_id: string; demo_images: BookImageRecord[] };
-
-    writeDemoBooks(demoBooks);
-    return { success: true, message: "Book updated." };
   }
 
   if (!isSupabaseClientConfigured) {
@@ -421,14 +244,24 @@ export async function deleteBook(bookId: string) {
     return { success: false, message: "Please sign in." };
   }
 
-  if (authContext.isDemo) {
-    const demoBooks = readDemoBooks().filter((book) => book.id !== bookId);
-    writeDemoBooks(demoBooks);
-    return { success: true, message: "Book deleted." };
-  }
-
   if (!isSupabaseClientConfigured) {
     return { success: false, message: "Supabase is not configured." };
+  }
+
+  const { data: images } = await supabase
+    .from("book_images")
+    .select("id,image_url")
+    .eq("book_id", bookId);
+
+  if (images && images.length > 0) {
+    for (const img of images) {
+      try {
+        const url = new URL(img.image_url);
+        const path = url.pathname.split("/storage/v1/object/public/book-images/")[1];
+        if (path) await supabase.storage.from("book-images").remove([path]).catch(() => {});
+      } catch { /* ignore */ }
+    }
+    await supabase.from("book_images").delete().eq("book_id", bookId);
   }
 
   const { error } = await supabase.from("books").delete().eq("id", bookId).eq("seller_id", userId);
@@ -447,28 +280,13 @@ export async function getMyBooks() {
     return { books: [] as BookRecord[], counts: { total: 0, active: 0, drafts: 0, sold: 0 } };
   }
 
-  if (authContext.isDemo) {
-    const demoBooks = readDemoBooks()
-      .filter((book) => book.seller_id === userId)
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
-    const counts = {
-      total: demoBooks.length,
-      drafts: demoBooks.filter((book) => book.status === "draft").length,
-      sold: demoBooks.filter((book) => book.status === "sold").length,
-      active: demoBooks.filter((book) => book.status === "active").length,
-    };
-
-    return { books: demoBooks, counts };
-  }
-
   if (!isSupabaseClientConfigured) {
     return { books: [] as BookRecord[], counts: { total: 0, active: 0, drafts: 0, sold: 0 } };
   }
 
   const { data, error } = await supabase
     .from("books")
-    .select("id,title,author,selling_price,original_price,status,category,subject,created_at")
+    .select("id,title,author,isbn,selling_price,original_price,status,category,subject,created_at")
     .eq("seller_id", userId)
     .order("created_at", { ascending: false });
 
@@ -483,18 +301,19 @@ export async function getMyBooks() {
   return { books, counts, error };
 }
 
-function applyFallbackFilters(books: BookWithImages[], filters: BookFilters) {
+function applyFilters(books: BookWithImages[], filters: BookFilters) {
   const search = filters.search?.trim().toLowerCase();
   const filtered = books.filter((book) => {
     const matchesSearch = !search || [book.title, book.author, book.category, book.subject].some((field) => field?.toLowerCase().includes(search));
     const matchesCategory = !filters.category || book.category === filters.category;
+    const matchesSubject = !filters.subject || book.subject === filters.subject;
     const matchesCondition = !filters.condition || book.condition === filters.condition;
     const matchesCollege = !filters.college || book.college?.toLowerCase().includes(filters.college.toLowerCase());
     const matchesCity = !filters.city || book.city?.toLowerCase().includes(filters.city.toLowerCase());
     const matchesMinPrice = filters.minPrice === undefined || book.selling_price >= filters.minPrice;
     const matchesMaxPrice = filters.maxPrice === undefined || book.selling_price <= filters.maxPrice;
 
-    return matchesSearch && matchesCategory && matchesCondition && matchesCollege && matchesCity && matchesMinPrice && matchesMaxPrice;
+    return matchesSearch && matchesCategory && matchesSubject && matchesCondition && matchesCollege && matchesCity && matchesMinPrice && matchesMaxPrice;
   });
 
   return filtered.sort((a, b) => {
@@ -510,39 +329,29 @@ function applyFallbackFilters(books: BookWithImages[], filters: BookFilters) {
   });
 }
 
-function demoBookToBookWithImages(book: BookRecord & { seller_id: string; demo_images?: BookImageRecord[] }): BookWithImages {
-  return {
-    ...book,
-    images: book.demo_images ?? [],
-    seller: {
-      full_name: book.seller_name ?? null,
-      phone: book.seller_phone ?? null,
-      college: book.college ?? null,
-      city: book.city ?? null,
-    },
-  };
-}
-
 export async function fetchBooks(filters: BookFilters = {}) {
   if (!isSupabaseClientConfigured) {
-    const allLocal = [...readDemoBooks().map(demoBookToBookWithImages), ...fallbackBooks];
-    return { books: applyFallbackFilters(allLocal, filters), error: null };
+    return { books: [] as BookWithImages[], error: null };
   }
 
   let query = supabase
     .from("books")
     .select(
-      `id,title,author,selling_price,original_price,condition,category,subject,description,college,city,created_at,seller_id,images:book_images(image_url,display_order),seller:profiles(full_name,phone,college,city)`
+      `id,title,author,isbn,selling_price,original_price,condition,category,subject,description,college,city,created_at,seller_id,images:book_images(image_url,display_order),seller:profiles(full_name,phone,college,city)`
     )
     .eq("status", "active");
 
   if (filters.search) {
-    const search = filters.search.trim();
-    query = query.or(`title.ilike.%${search}%,author.ilike.%${search}%,category.ilike.%${search}%`);
+    const sanitized = filters.search.trim().replace(/[%_]/g, (ch) => `\\${ch}`);
+    query = query.or(`title.ilike.%${sanitized}%,author.ilike.%${sanitized}%,category.ilike.%${sanitized}%,subject.ilike.%${sanitized}%`);
   }
 
   if (filters.category) {
     query = query.eq("category", filters.category);
+  }
+
+  if (filters.subject) {
+    query = query.eq("subject", filters.subject);
   }
 
   if (filters.condition) {
@@ -577,41 +386,15 @@ export async function fetchBooks(filters: BookFilters = {}) {
   const books = ((data ?? []) as unknown) as BookWithImages[];
 
   if (error) {
-    return { books: applyFallbackFilters(fallbackBooks, filters), error };
-  }
-
-  if (!books.length) {
-    return { books: [], error: null };
+    return { books: [] as BookWithImages[], error };
   }
 
   return { books, error };
 }
 
 export async function fetchBookById(bookId: string) {
-  // Demo books (published without Supabase)
-  const demoBook = readDemoBooks().find((book) => book.id === bookId);
-
-  if (demoBook) {
-    return {
-      book: demoBookToBookWithImages(demoBook),
-      error: null,
-    };
-  }
-
-  // Built-in demo books
-  const fallbackBook = fallbackBooks.find((book) => book.id === bookId);
-  if (fallbackBook) {
-    return {
-      book: fallbackBook,
-      error: null,
-    };
-  }
-
   if (!isSupabaseClientConfigured) {
-    return {
-      book: null,
-      error: null,
-    };
+    return { book: null, error: null };
   }
 
   const { data, error } = await supabase
@@ -625,14 +408,8 @@ export async function fetchBookById(bookId: string) {
     .single();
 
   if (error) {
-    return {
-      book: null,
-      error,
-    };
+    return { book: null, error };
   }
 
-  return {
-    book: data as BookWithImages,
-    error: null,
-  };
+  return { book: data as BookWithImages, error: null };
 }

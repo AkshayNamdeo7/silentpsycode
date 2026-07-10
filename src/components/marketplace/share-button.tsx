@@ -30,6 +30,7 @@ export default function ShareButton({ url, className }: ShareButtonProps) {
       if (clipboard) {
         await clipboard.writeText(resolvedUrl);
         setShared(true);
+        setTimeout(() => setShared(false), 2000);
       }
     } catch {
       setShared(false);

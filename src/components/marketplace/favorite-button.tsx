@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 import clsx from "clsx";
 
@@ -11,16 +11,21 @@ interface FavoriteButtonProps {
 
 const STORAGE_KEY = "silentpsy-wishlist";
 
+function readFavorites(): string[] {
+  if (typeof window === "undefined") return [];
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]") as string[];
+  } catch {
+    return [];
+  }
+}
+
 export default function FavoriteButton({ bookId, className }: FavoriteButtonProps) {
-  const [favorited, setFavorited] = useState(() => {
-    if (typeof window === "undefined") return false;
-    try {
-      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]") as string[];
-      return stored.includes(bookId);
-    } catch {
-      return false;
-    }
-  });
+  const [favorited, setFavorited] = useState(false);
+
+  useEffect(() => {
+    setFavorited(readFavorites().includes(bookId));
+  }, [bookId]);
 
   const toggleFavorite = () => {
     if (typeof window === "undefined") return;

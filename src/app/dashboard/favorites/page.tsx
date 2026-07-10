@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Heart } from "lucide-react";
 import Button from "@/components/ui/button";
+import FavoriteButton from "@/components/marketplace/favorite-button";
 import { fetchBookById, type BookWithImages } from "@/lib/books";
 
 const STORAGE_KEY = "silentpsy-wishlist";
@@ -30,10 +32,16 @@ export default function FavoritesPage() {
 
         const results = await Promise.allSettled(stored.map((id) => fetchBookById(id)));
         const fetchedBooks: BookWithImages[] = [];
+        const validIds: string[] = [];
         for (const result of results) {
           if (result.status === "fulfilled" && result.value.book) {
             fetchedBooks.push(result.value.book);
+            validIds.push(result.value.book.id);
           }
+        }
+        if (validIds.length !== stored.length) {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(validIds));
+          setBookIds(validIds);
         }
         setBooks(fetchedBooks);
       } catch {
@@ -96,22 +104,43 @@ export default function FavoritesPage() {
         </div>
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-          {books.map((book) => (
-            <div key={book.id} className="rounded-[2rem] border border-white/10 bg-slate-950/90 p-6 shadow-[0_25px_70px_-40px_rgba(15,23,42,0.9)]">
-              <Link href={`/books/${book.id}`} className="block">
-                <h3 className="text-lg font-semibold text-white transition hover:text-sky-300">{book.title}</h3>
-              </Link>
-              <p className="mt-2 text-sm text-slate-400">by {book.author}</p>
-              <p className="mt-4 text-xl font-semibold text-white">
-                ₹{book.selling_price.toLocaleString("en-IN")}
-              </p>
-              <div className="mt-6 flex gap-3">
-                <Button asChild size="sm">
-                  <Link href={`/books/${book.id}`}>View details</Link>
-                </Button>
+          {books.map((book) => {
+            const imageUrl = book.images?.[0]?.image_url;
+            return (
+              <div key={book.id} className="group overflow-hidden rounded-[2rem] border border-white/10 bg-slate-950/90 shadow-[0_25px_70px_-40px_rgba(15,23,42,0.9)]">
+                {imageUrl ? (
+                  <Link href={`/books/${book.id}`} className="block">
+                    <div className="relative h-48 w-full sm:h-56">
+                      <Image
+                        src={imageUrl}
+                        alt={book.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        className="object-cover transition duration-500 group-hover:scale-105"
+                      />
+                    </div>
+                  </Link>
+                ) : null}
+                <div className="p-6">
+                  <div className="flex items-start justify-between gap-3">
+                    <Link href={`/books/${book.id}`} className="block">
+                      <h3 className="text-lg font-semibold text-white transition hover:text-sky-300">{book.title}</h3>
+                    </Link>
+                    <FavoriteButton bookId={book.id} />
+                  </div>
+                  <p className="mt-2 text-sm text-slate-400">by {book.author}</p>
+                  <p className="mt-4 text-xl font-semibold text-white">
+                    ₹{book.selling_price.toLocaleString("en-IN")}
+                  </p>
+                  <div className="mt-6 flex gap-3">
+                    <Button asChild size="sm">
+                      <Link href={`/books/${book.id}`}>View details</Link>
+                    </Button>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

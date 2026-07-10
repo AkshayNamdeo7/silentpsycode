@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/layout/navbar";
 import SectionTitle from "@/components/common/section-title";
@@ -15,6 +15,7 @@ import Link from "next/link";
 const defaultFilters: FilterType = {
   search: "",
   category: undefined,
+  subject: undefined,
   condition: undefined,
   minPrice: undefined,
   maxPrice: undefined,
@@ -27,11 +28,14 @@ function BooksPageContent() {
   const searchParams = useSearchParams();
   const [filters, setFilters] = useState<FilterType>(() => {
     const initialSearch = searchParams?.get("search") ?? "";
-    return { ...defaultFilters, search: initialSearch };
+    const initialCategory = searchParams?.get("category") ?? undefined;
+    return { ...defaultFilters, search: initialSearch, category: initialCategory };
   });
   const [books, setBooks] = useState<BookWithImages[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const filterVersionRef = useRef(0);
 
   useEffect(() => {
     document.title = "Browse Books | Silent Psycode";
@@ -51,10 +55,14 @@ function BooksPageContent() {
   }, []);
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      void loadBooks(filters);
-    }, 0);
-    return () => clearTimeout(handler);
+    const version = ++filterVersionRef.current;
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      if (version === filterVersionRef.current) {
+        void loadBooks(filters);
+      }
+    }, 300);
+    return () => clearTimeout(debounceRef.current);
   }, [filters, loadBooks]);
 
   const sectionDescription = useMemo(() => {

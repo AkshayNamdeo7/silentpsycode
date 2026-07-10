@@ -6,6 +6,7 @@ import Link from "next/link";
 import AuthCard from "@/components/auth/auth-card";
 import Button from "@/components/ui/button";
 import Input from "@/components/ui/input";
+import clsx from "clsx";
 import { sendPasswordResetEmail } from "@/lib/auth";
 
 export default function ForgotPasswordPage() {
@@ -16,6 +17,7 @@ export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [statusSuccess, setStatusSuccess] = useState(true);
 
   const validate = () => {
     const nextErrors: Record<string, string> = {};
@@ -35,6 +37,7 @@ export default function ForgotPasswordPage() {
     if (Object.keys(nextErrors).length === 0) {
       const result = await sendPasswordResetEmail(email);
       setStatusMessage(result.message ?? "Password reset request accepted.");
+      setStatusSuccess(result.success ?? false);
     } else {
       setStatusMessage(null);
     }
@@ -84,7 +87,7 @@ export default function ForgotPasswordPage() {
             </Button>
 
             {statusMessage ? (
-              <p className="rounded-3xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+              <p className={clsx("rounded-3xl border px-4 py-3 text-sm", statusSuccess ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-200" : "border-rose-500/20 bg-rose-500/10 text-rose-200")}>
                 {statusMessage}
               </p>
             ) : null}

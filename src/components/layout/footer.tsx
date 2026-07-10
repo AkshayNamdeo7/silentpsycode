@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Footer() {
   return (
     <footer className="border-t border-white/10 bg-slate-950/95 py-16">
@@ -17,17 +19,17 @@ export default function Footer() {
           <div>
             <p className="text-sm uppercase tracking-[0.28em] text-slate-500">Marketplace</p>
             <nav className="mt-5 space-y-3 text-sm text-slate-400">
-              <a href="#categories" className="block transition hover:text-white">Categories</a>
-              <a href="#books" className="block transition hover:text-white">Featured Books</a>
-              <a href="#faq" className="block transition hover:text-white">FAQ</a>
+              <a href="/#categories" className="block transition hover:text-white">Categories</a>
+              <a href="/#books" className="block transition hover:text-white">Featured Books</a>
+              <a href="/#faq" className="block transition hover:text-white">FAQ</a>
             </nav>
           </div>
           <div>
             <p className="text-sm uppercase tracking-[0.28em] text-slate-500">Company</p>
             <nav className="mt-5 space-y-3 text-sm text-slate-400">
-              <a href="#" className="block transition hover:text-white">About</a>
-              <a href="#" className="block transition hover:text-white">Careers</a>
-              <a href="#" className="block transition hover:text-white">Contact</a>
+              <Link href="/#features" className="block transition hover:text-white">About</Link>
+              <Link href="/#categories" className="block transition hover:text-white">Categories</Link>
+              <Link href="mailto:hello@silentpsycode.com" className="block transition hover:text-white">Contact</Link>
             </nav>
           </div>
         </div>
@@ -36,8 +38,8 @@ export default function Footer() {
           <p className="text-sm uppercase tracking-[0.28em] text-slate-500">Stay connected</p>
           <p className="text-sm leading-7 text-slate-400">Subscribe for updates on premium drops, author moments, and marketplace exclusives.</p>
           <div className="flex flex-wrap gap-3">
-            <a href="#" className="rounded-full border border-white/10 bg-slate-900/80 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:border-sky-500/30 hover:bg-slate-900">Newsletter</a>
-            <a href="#" className="rounded-full border border-white/10 bg-slate-900/80 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:border-sky-500/30 hover:bg-slate-900">Start selling</a>
+            <a href="/#faq" className="rounded-full border border-white/10 bg-slate-900/80 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:border-sky-500/30 hover:bg-slate-900">Newsletter</a>
+            <Link href="/sell" className="rounded-full border border-white/10 bg-slate-900/80 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:border-sky-500/30 hover:bg-slate-900">Start selling</Link>
           </div>
         </div>
       </div>

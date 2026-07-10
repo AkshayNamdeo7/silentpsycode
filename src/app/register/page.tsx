@@ -10,6 +10,7 @@ import Button from "@/components/ui/button";
 import OAuthButton from "@/components/auth/oauth-button";
 import PasswordToggleInput from "@/components/auth/password-toggle-input";
 import Input from "@/components/ui/input";
+import clsx from "clsx";
 import { signUpWithEmail } from "@/lib/auth";
 
 export default function RegisterPage() {
@@ -24,6 +25,7 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [statusSuccess, setStatusSuccess] = useState(true);
   const [needsConfirmation, setNeedsConfirmation] = useState(false);
 
   const validate = () => {
@@ -56,6 +58,7 @@ export default function RegisterPage() {
     if (Object.keys(nextErrors).length === 0) {
       const result = await signUpWithEmail(name, email, password);
       setStatusMessage(result.message ?? "Registration request accepted.");
+      setStatusSuccess(result.success ?? false);
       setNeedsConfirmation(result.needsConfirmation ?? false);
 
       if (result.success && !result.needsConfirmation) {
@@ -161,7 +164,7 @@ export default function RegisterPage() {
                   <p className="mt-2 text-amber-300/80">{statusMessage}</p>
                 </div>
               ) : statusMessage ? (
-                <p className="rounded-3xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+                <p className={clsx("rounded-3xl border px-4 py-3 text-sm", statusSuccess ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-200" : "border-rose-500/20 bg-rose-500/10 text-rose-200")}>
                   {statusMessage}
                 </p>
               ) : null}

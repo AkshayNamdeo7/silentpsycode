@@ -10,6 +10,7 @@ import Button from "@/components/ui/button";
 import OAuthButton from "@/components/auth/oauth-button";
 import PasswordToggleInput from "@/components/auth/password-toggle-input";
 import Input from "@/components/ui/input";
+import clsx from "clsx";
 import { signInWithEmail } from "@/lib/auth";
 
 function LoginForm() {
@@ -23,6 +24,7 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [statusSuccess, setStatusSuccess] = useState(true);
 
   const validate = () => {
     const nextErrors: Record<string, string> = {};
@@ -47,9 +49,11 @@ function LoginForm() {
     if (Object.keys(nextErrors).length === 0) {
       const result = await signInWithEmail(email, password);
       setStatusMessage(result.message ?? "Login request accepted.");
+      setStatusSuccess(result.success ?? false);
 
       if (result.success) {
-        const redirectTo = searchParams?.get("redirect") ?? "/dashboard";
+        const rawRedirect = searchParams?.get("redirect") ?? "/dashboard";
+        const redirectTo = rawRedirect.startsWith("/") && !rawRedirect.startsWith("//") ? rawRedirect : "/dashboard";
         router.push(redirectTo);
       }
     } else {
@@ -82,7 +86,7 @@ function LoginForm() {
           </p>
 
           <div className="mt-8 space-y-4">
-            <OAuthButton label="Continue with Google" icon={Mail} />
+            <OAuthButton label="Sign in with Google" icon={Mail} />
 
             <div className="relative">
               <div className="absolute inset-x-0 top-1/2 h-px bg-white/10" />
@@ -129,7 +133,7 @@ function LoginForm() {
               </Button>
 
               {statusMessage ? (
-                <p className="rounded-3xl border border-emerald-500/20 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+                <p className={clsx("rounded-3xl border px-4 py-3 text-sm", statusSuccess ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-200" : "border-rose-500/20 bg-rose-500/10 text-rose-200")}>
                   {statusMessage}
                 </p>
               ) : null}

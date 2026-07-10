@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin, Tag } from "lucide-react";
@@ -19,6 +19,10 @@ function formatPrice(value: number | string) {
 
 export default function BookCard({ book }: BookCardProps) {
   const [imageError, setImageError] = useState(false);
+
+  useEffect(() => {
+    setImageError(false);
+  }, [book.id]);
   const imageUrl = book.images?.[0]?.image_url;
   const sellerName = book.seller_name || book.seller?.full_name || "Student Seller";
   const price = formatPrice(book.selling_price);
@@ -84,12 +88,12 @@ export default function BookCard({ book }: BookCardProps) {
           </div>
 
           <div className="mt-6">
-           <Link
-  href={`/books/${book.id}`}
-  className="block w-full rounded-full bg-blue-600 py-3 text-center font-semibold text-white hover:bg-blue-700"
->
-  View Details
-</Link>
+            <Link
+              href={`/books/${book.id}`}
+              className="block w-full rounded-full bg-sky-500 py-3 text-center font-semibold text-slate-950 hover:bg-sky-400"
+            >
+              View Details
+            </Link>
           </div>
         </div>
       </div>

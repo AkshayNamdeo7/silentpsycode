@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import TopNav from "@/components/dashboard/top-nav";
 import Sidebar from "@/components/dashboard/sidebar";
-import { isSupabaseClientConfigured, supabase } from "@/lib/supabase";
-import { setAuthCookie, clearAuthCookie } from "@/lib/supabase/middleware";
 
 interface DashboardShellProps {
   children: React.ReactNode;
@@ -13,22 +11,6 @@ interface DashboardShellProps {
 
 export default function DashboardShell({ children }: DashboardShellProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  useEffect(() => {
-    const { data: listener } = isSupabaseClientConfigured
-      ? supabase.auth.onAuthStateChange((_event, session) => {
-          if (session) {
-            setAuthCookie();
-          } else {
-            clearAuthCookie();
-          }
-        })
-      : { data: { subscription: { unsubscribe: () => {} } } };
-
-    return () => {
-      listener.subscription.unsubscribe();
-    };
-  }, []);
 
   return (
     <div className="min-h-screen bg-[#050816] text-white">

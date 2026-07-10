@@ -2,6 +2,9 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import Button from "@/components/ui/button";
+import Input from "@/components/ui/input";
+
+const NEWSLETTER_STORAGE_KEY = "silentpsy-newsletter-emails";
 
 export default function Newsletter() {
   const [email, setEmail] = useState("");
@@ -10,6 +13,15 @@ export default function Newsletter() {
   const handleSubscribe = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (email.trim()) {
+      try {
+        const stored = JSON.parse(localStorage.getItem(NEWSLETTER_STORAGE_KEY) || "[]") as string[];
+        if (!stored.includes(email.trim())) {
+          stored.push(email.trim());
+          localStorage.setItem(NEWSLETTER_STORAGE_KEY, JSON.stringify(stored));
+        }
+      } catch {
+        // localStorage unavailable
+      }
       setSubscribed(true);
       setEmail("");
     }
@@ -40,13 +52,12 @@ export default function Newsletter() {
             <label className="text-sm font-medium text-slate-300" htmlFor="newsletter-email">
               Email address
             </label>
-            <input
+            <Input
               id="newsletter-email"
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               placeholder="you@example.com"
-              className="w-full rounded-3xl border border-slate-800 bg-slate-900 px-4 py-3 text-white placeholder:text-slate-500 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400/20"
             />
             {subscribed ? (
               <p className="text-sm text-emerald-400">Thanks for subscribing!</p>

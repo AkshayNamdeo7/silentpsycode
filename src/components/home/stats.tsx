@@ -19,7 +19,7 @@ export default function Stats() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, amount: 0.4 }}
             transition={{ duration: 0.45, delay: index * 0.08 }}
-            className="rounded-[2rem] border border-white/10 bg-slate-950/80 p-10 text-center shadow-[0_30px_80px_-40px_rgba(15,23,42,0.65)] transition-transform duration-300 ease-out hover:-translate-y-1"
+            className="rounded-[2rem] border border-white/10 bg-slate-950/80 p-8 text-center shadow-[0_30px_80px_-40px_rgba(15,23,42,0.65)] transition-transform duration-300 ease-out hover:-translate-y-1 sm:p-10"
           >
             <div className={`inline-flex rounded-full px-4 py-2 text-sm font-semibold ${stat.accent}`}>
               {stat.label}

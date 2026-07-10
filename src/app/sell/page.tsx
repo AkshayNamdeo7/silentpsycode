@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { ShieldCheck, Sparkles } from "lucide-react";
 import Button from "@/components/ui/button";
@@ -9,7 +9,9 @@ import Dropzone from "@/components/ui/dropzone";
 import Input from "@/components/ui/input";
 import Select from "@/components/ui/select";
 import Textarea from "@/components/ui/textarea";
-import { publishBook, updateBook, fetchBookById } from "@/lib/books";
+import { publishBook, updateBook, fetchBookById, type BookImageRecord } from "@/lib/books";
+import { supabase } from "@/lib/supabase";
+import { getCurrentAuthContext } from "@/lib/auth";
 
 const categories = [
   "Engineering",
@@ -46,22 +48,21 @@ const initialState = {
   contactPreference: "Email",
 };
 
-export default function SellPage() {
+function SellPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const editId = searchParams?.get("id") ?? null;
 
   useEffect(() => {
     document.title = "Sell a Book | Silent Psycode";
   }, []);
-
-  const [editId] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    return new URLSearchParams(window.location.search).get("id") || null;
-  });
   const [form, setForm] = useState(initialState);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [publishSuccess, setPublishSuccess] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
+  const [existingImages, setExistingImages] = useState<BookImageRecord[]>([]);
+  const [removedImageIds, setRemovedImageIds] = useState<string[]>([]);
 
   useEffect(() => {
     if (!editId) return;
@@ -73,13 +74,13 @@ export default function SellPage() {
           title: b.title,
           author: b.author,
           sellerName: b.seller_name ?? "",
-          isbn: "",
+          isbn: b.isbn ?? "",
           category: b.category,
           subject: b.subject,
           condition: b.condition ?? "Good",
           sellingPrice: b.selling_price.toString(),
           originalPrice: b.original_price?.toString() ?? "",
-          description: "",
+          description: b.description ?? "",
           college: b.college ?? "",
           branch: b.branch ?? "",
           semester: b.semester ?? "",
@@ -89,30 +90,38 @@ export default function SellPage() {
           email: b.contact_email ?? "",
           contactPreference: b.contact_preference ?? "Email",
         });
+        const images = (b.images ?? []).slice().sort((a, b) => a.display_order - b.display_order);
+        setExistingImages(images);
       }
     });
   }, [editId]);
 
-  const previews = useMemo(
-    () => form.images.map((file) => ({ file, url: URL.createObjectURL(file) })),
-    [form.images]
+  const previewImage = useMemo(
+    () => (form.images[0] ? URL.createObjectURL(form.images[0]) : undefined),
+    [form.images[0]]
   );
 
   useEffect(() => {
     return () => {
-      previews.forEach((preview) => URL.revokeObjectURL(preview.url));
+      if (previewImage) URL.revokeObjectURL(previewImage);
     };
-  }, [previews]);
+  }, [previewImage]);
 
   const handleChange = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
+  const removeExistingImage = (imageId: string) => {
+    setExistingImages((prev) => prev.filter((img) => img.id !== imageId));
+    setRemovedImageIds((prev) => [...prev, imageId]);
+  };
+
   const validate = () => {
     const nextErrors: Record<string, string> = {};
 
     if (!editId && form.images.length === 0) nextErrors.images = "Add at least one book image.";
+    if (editId && existingImages.length === 0 && form.images.length === 0) nextErrors.images = "Add at least one book image.";
     if (!form.title.trim()) nextErrors.title = "Enter a book title.";
     if (!form.author.trim()) nextErrors.author = "Enter the author name.";
     if (!form.sellerName.trim()) nextErrors.sellerName = "Enter your name.";
@@ -120,6 +129,7 @@ export default function SellPage() {
     if (!form.subject.trim()) nextErrors.subject = "Specify the subject or course.";
     if (!form.condition) nextErrors.condition = "Select the book condition.";
     if (!form.sellingPrice.trim()) nextErrors.sellingPrice = "Enter the selling price.";
+    else if (isNaN(Number(form.sellingPrice)) || Number(form.sellingPrice) <= 0) nextErrors.sellingPrice = "Enter a valid price.";
     if (!form.college.trim()) nextErrors.college = "Enter your college.";
     if (!form.branch.trim()) nextErrors.branch = "Enter your course or branch.";
     if (!form.semester.trim()) nextErrors.semester = "Enter the semester.";
@@ -145,18 +155,58 @@ export default function SellPage() {
 
     if (Object.keys(nextErrors).length === 0) {
       setIsPublishing(true);
-      const result = editId ? await updateBook(editId, form) : await publishBook(form);
-      setStatusMessage(result.message);
-      setPublishSuccess(result.success);
-      setIsPublishing(false);
+      try {
+        const result = editId ? await updateBook(editId, form) : await publishBook(form);
+        setStatusMessage(result.message);
+        setPublishSuccess(result.success);
 
-      if (result.success) {
-        router.push("/dashboard");
+        if (result.success && editId) {
+          for (const imgId of removedImageIds) {
+            const img = (await supabase.from("book_images").select("image_url").eq("id", imgId).single()).data;
+            if (img?.image_url) {
+              try {
+                const url = new URL(img.image_url);
+                const path = url.pathname.split("/storage/v1/object/public/book-images/")[1];
+                if (path) await supabase.storage.from("book-images").remove([path]).catch(() => {});
+              } catch { /* ignore */ }
+            }
+            await supabase.from("book_images").delete().eq("id", imgId);
+          }
+
+          if (form.images.length > 0) {
+            const authContext = await getCurrentAuthContext();
+            const userId = authContext.userId;
+            if (userId) {
+              for (let i = 0; i < form.images.length; i++) {
+                const file = form.images[i];
+                const safeFileName = `${crypto.randomUUID()}-${file.name}`;
+                const path = `books/${userId}/${editId}/${safeFileName}`;
+                const { error: uploadError } = await supabase.storage
+                  .from("book-images")
+                  .upload(path, file, { cacheControl: "3600", upsert: false });
+                if (!uploadError) {
+                  const { data: publicUrlData } = supabase.storage.from("book-images").getPublicUrl(path);
+                  await supabase.from("book_images").insert({
+                    book_id: editId,
+                    image_url: publicUrlData.publicUrl,
+                    display_order: existingImages.length + i + 1,
+                  });
+                }
+              }
+            }
+          }
+        }
+
+        if (result.success) {
+          router.push("/dashboard");
+        }
+      } catch {
+        setStatusMessage("An unexpected error occurred.");
+        setPublishSuccess(false);
       }
+      setIsPublishing(false);
     }
   };
-
-  const previewImage = previews[0]?.url;
 
   return (
     <main className="min-h-screen bg-[#050816] px-4 py-10 sm:px-6 lg:px-8">
@@ -175,16 +225,35 @@ export default function SellPage() {
                   Sell a Book
                 </p>
                 <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl text-balance">
-                  List your second-hand book in minutes.
+                  {editId ? "Update your listing." : "List your second-hand book in minutes."}
                 </h1>
                 <p className="max-w-3xl text-base leading-8 text-slate-400 sm:text-lg">
-                  Upload photos, set a student-friendly price, and reach buyers across campus and beyond with a premium listing experience.
+                  {editId
+                    ? "Edit your listing details, update images, and adjust pricing."
+                    : "Upload photos, set a student-friendly price, and reach buyers across campus and beyond with a premium listing experience."}
                 </p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-8">
                 <div>
                   <label className="mb-3 block text-sm font-medium text-slate-200">Book images</label>
+                  {existingImages.length > 0 && (
+                    <div className="mb-4 grid gap-3 sm:grid-cols-3">
+                      {existingImages.map((img) => (
+                        <div key={img.id} className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-900/90">
+                          <img src={img.image_url} alt={`Existing image ${img.display_order}`} className="h-32 w-full object-cover" />
+                          <button
+                            type="button"
+                            onClick={() => removeExistingImage(img.id)}
+                            className="absolute right-3 top-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-950/80 text-white transition hover:bg-rose-500/90"
+                          >
+                            <span className="sr-only">Remove image</span>
+                            <span className="text-base">×</span>
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                   <Dropzone
                     files={form.images}
                     onFilesChange={(files) => setForm((prev) => ({ ...prev, images: files }))}
@@ -469,11 +538,11 @@ export default function SellPage() {
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-sm text-slate-400">
-                      Ready to publish? Review the preview before posting your listing.
+                      {editId ? "Review your changes before updating the listing." : "Ready to publish? Review the preview before posting your listing."}
                     </p>
                   </div>
                   <Button type="submit" disabled={isPublishing} className="w-full sm:w-auto px-8 py-4">
-                    {isPublishing ? "Publishing..." : "Publish Book"}
+                    {isPublishing ? (editId ? "Updating..." : "Publishing...") : (editId ? "Update Book" : "Publish Book")}
                   </Button>
                 </div>
 
@@ -513,7 +582,11 @@ export default function SellPage() {
                     <p className="text-sm text-slate-400">{form.author ? `by ${form.author}` : "Author name"}</p>
                   </div>
 
-                  <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <div className="rounded-[1.75rem] bg-slate-900/90 p-4">
+                      <p className="text-xs uppercase tracking-[0.28em] text-slate-400">Category</p>
+                      <p className="mt-2 text-sm font-semibold text-white">{form.category}</p>
+                    </div>
                     <div className="rounded-[1.75rem] bg-slate-900/90 p-4">
                       <p className="text-xs uppercase tracking-[0.28em] text-slate-400">Condition</p>
                       <p className="mt-2 text-sm font-semibold text-white">{form.condition}</p>
@@ -574,5 +647,13 @@ export default function SellPage() {
         </div>
       </motion.div>
     </main>
+  );
+}
+
+export default function SellPage() {
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-[#050816] flex items-center justify-center"><p className="text-slate-400 text-sm">Loading...</p></main>}>
+      <SellPageContent />
+    </Suspense>
   );
 }

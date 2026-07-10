@@ -1,18 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
+import { SB_SESSION_COOKIE } from "@/lib/supabase/client";
 
-export const AUTH_COOKIE_NAME = "silentpsycode_session";
 const protectedRoutePrefixes = ["/dashboard", "/sell"];
 
-export function setAuthCookie() {
-  if (typeof document === "undefined") return;
-  const secureFlag = typeof window !== "undefined" && window.location.protocol === "https:" ? "; Secure" : "";
-  document.cookie = `${AUTH_COOKIE_NAME}=1; Path=/; Max-Age=${60 * 60 * 24 * 7}; SameSite=Strict${secureFlag}`;
-}
-
-export function clearAuthCookie() {
-  if (typeof document === "undefined") return;
-  const secureFlag = typeof window !== "undefined" && window.location.protocol === "https:" ? "; Secure" : "";
-  document.cookie = `${AUTH_COOKIE_NAME}=; Path=/; Max-Age=0; SameSite=Strict${secureFlag}`;
+function isValidSessionCookie(cookieValue: string | undefined): boolean {
+  if (!cookieValue) return false;
+  try {
+    const decoded = decodeURIComponent(cookieValue);
+    const { t, e } = JSON.parse(decoded);
+    if (!t || typeof e !== "number") return false;
+    return e > Date.now() / 1000;
+  } catch {
+    return false;
+  }
 }
 
 export function requiresAuth(request: NextRequest): NextResponse | undefined {
@@ -25,7 +25,8 @@ export function requiresAuth(request: NextRequest): NextResponse | undefined {
     return undefined;
   }
 
-  if (request.cookies.get(AUTH_COOKIE_NAME)?.value) {
+  const cookieValue = request.cookies.get(SB_SESSION_COOKIE)?.value;
+  if (isValidSessionCookie(cookieValue)) {
     return undefined;
   }
 

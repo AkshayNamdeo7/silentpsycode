@@ -116,12 +116,13 @@ export default function Hero() {
             >
               <div className="flex flex-wrap justify-center gap-3">
                 {categories.map((category) => (
-                  <span
+                  <Link
                     key={category}
+                    href={`/books?category=${encodeURIComponent(category)}`}
                     className="rounded-full border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-slate-200 transition hover:border-sky-300/30 hover:bg-slate-900/80"
                   >
                     {category}
-                  </span>
+                  </Link>
                 ))}
               </div>
             </motion.div>

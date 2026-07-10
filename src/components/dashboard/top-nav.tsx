@@ -73,9 +73,9 @@ export default function TopNav({ onToggleSidebar }: TopNavProps) {
 
         <Link
           href="/sell"
-          className="hidden rounded-full bg-sky-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 sm:inline-flex"
+          className="rounded-full bg-sky-500 px-4 py-2 text-xs font-semibold text-slate-950 transition hover:bg-sky-400 sm:px-5 sm:py-3 sm:text-sm"
         >
-          Sell a Book
+          Sell
         </Link>
 
         <div className="relative">

@@ -3,10 +3,10 @@ import { motion } from "framer-motion";
 import SectionTitle from "@/components/common/section-title";
 
 const categories = [
-  { name: "Fiction", books: "3.5K", icon: "✨" },
-  { name: "Business", books: "1.2K", icon: "💼" },
-  { name: "Self Improvement", books: "940", icon: "🌱" },
-  { name: "Mystery", books: "760", icon: "🕵️" },
+  { name: "Engineering", books: "2.1K", icon: "📐" },
+  { name: "Medical", books: "1.8K", icon: "🩺" },
+  { name: "UPSC", books: "940", icon: "🏛️" },
+  { name: "Novels", books: "1.5K", icon: "📚" },
 ];
 
 export default function FeaturedCategories() {
@@ -27,7 +27,7 @@ export default function FeaturedCategories() {
             viewport={{ once: true, amount: 0.35 }}
             transition={{ duration: 0.45, delay: index * 0.08 }}
             whileHover={{ y: -3 }}
-            className="rounded-[2rem] border border-white/10 bg-white/5 p-8 backdrop-blur-xl transition-transform duration-300 ease-out"
+            className="rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur-xl transition-transform duration-300 ease-out sm:p-8"
           >
             <div className="inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-slate-800 text-2xl">
               {category.icon}

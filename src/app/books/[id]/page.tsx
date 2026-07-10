@@ -7,24 +7,28 @@ import Navbar from "@/components/layout/navbar";
 import FavoriteButton from "@/components/marketplace/favorite-button";
 import ShareButton from "@/components/marketplace/share-button";
 import BookSkeleton from "@/components/marketplace/book-skeleton";
+import BookCard from "@/components/marketplace/book-card";
 import EmptyState from "@/components/marketplace/empty-state";
-import { fetchBookById, type BookWithImages } from "@/lib/books";
+import { fetchBookById, fetchBooks, type BookWithImages } from "@/lib/books";
 import Button from "@/components/ui/button";
 
 export default function BookDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
   const resolvedParams = use(params);
   const [book, setBook] = useState<BookWithImages | null>(null);
+  const [similarBooks, setSimilarBooks] = useState<BookWithImages[]>([]);
   const [mainImageError, setMainImageError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     const loadBook = async () => {
       setLoading(true);
       setError(null);
 
       const { book: fetchedBook, error: fetchError } = await fetchBookById(resolvedParams.id);
+      if (cancelled) return;
       if (fetchError || !fetchedBook) {
         setError(fetchError ? "Unable to load this book right now." : "Book not found.");
         setLoading(false);
@@ -34,9 +38,15 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
       setBook(fetchedBook);
       document.title = `${fetchedBook.title} | Silent Psycode`;
       setLoading(false);
+
+      const { books: similar } = await fetchBooks({ category: fetchedBook.category });
+      if (!cancelled) {
+        setSimilarBooks(similar.filter((b) => b.id !== fetchedBook.id).slice(0, 3));
+      }
     };
 
     void loadBook();
+    return () => { cancelled = true; };
   }, [resolvedParams.id]);
 
   if (loading) {
@@ -191,6 +201,20 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
           </aside>
         </div>
       </div>
+
+      {similarBooks.length > 0 && (
+        <div className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+          <div className="mb-8">
+            <p className="text-sm uppercase tracking-[0.32em] text-sky-300/80">Similar books</p>
+            <h2 className="mt-3 text-2xl font-semibold text-white">You might also like</h2>
+          </div>
+          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {similarBooks.map((sb) => (
+              <BookCard key={sb.id} book={sb} />
+            ))}
+          </div>
+        </div>
+      )}
     </main>
   );
 }

@@ -42,14 +42,25 @@ export default function DashboardPage() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
     async function loadBooks() {
-      const response = await getMyBooks();
-      setBooks(response.books ?? []);
-      setCounts(response.counts ?? { total: 0, active: 0, drafts: 0, sold: 0 });
-      setLoadingBooks(false);
+      try {
+        const response = await getMyBooks();
+        if (!cancelled) {
+          setBooks(response.books ?? []);
+          setCounts(response.counts ?? { total: 0, active: 0, drafts: 0, sold: 0 });
+        }
+      } catch {
+        if (!cancelled) {
+          setBooks([]);
+          setCounts({ total: 0, active: 0, drafts: 0, sold: 0 });
+        }
+      }
+      if (!cancelled) setLoadingBooks(false);
     }
 
     loadBooks();
+    return () => { cancelled = true; };
   }, []);
 
   const metrics = [
@@ -93,9 +104,9 @@ export default function DashboardPage() {
             <Button asChild className="w-full sm:w-auto">
             <Link href="/sell">Sell a Book</Link>
           </Button>
-          <Button asChild variant="secondary" className="w-full sm:w-auto">
-            <Link href="/dashboard#analytics">View analytics</Link>
-          </Button>
+            <Button asChild variant="secondary" className="w-full sm:w-auto">
+              <Link href="/dashboard#listings">View listings</Link>
+            </Button>
           </div>
         </div>
       </section>
@@ -155,7 +166,11 @@ export default function DashboardPage() {
                         onClick={async () => {
                           if (!window.confirm("Delete this listing?")) return;
                           setDeletingId(book.id);
-                          await deleteBook(book.id);
+                          const result = await deleteBook(book.id);
+                          if (!result.success) {
+                            setDeletingId(null);
+                            return;
+                          }
                           const response = await getMyBooks();
                           setBooks(response.books ?? []);
                           setCounts(response.counts ?? { total: 0, active: 0, drafts: 0, sold: 0 });
@@ -175,7 +190,7 @@ export default function DashboardPage() {
                 description="Your published books will appear here once you create your first listing. Start selling to populate your dashboard."
                 action={
                   <Button asChild variant="secondary" className="px-5 py-3">
-                    <a href="/sell">Publish your first book</a>
+                    <Link href="/sell">Publish your first book</Link>
                   </Button>
                 }
               />
@@ -247,7 +262,7 @@ export default function DashboardPage() {
             title="Community pulse"
             description="No unread messages or requests at the moment. Keep your storefront active for more buyer engagement."
             action={
-              <Button variant="secondary" className="px-5 py-3" onClick={() => { const url = window.location.origin + '/books'; navigator.clipboard?.writeText(url).catch(() => {}); }}>
+              <Button variant="secondary" className="px-5 py-3" onClick={() => { const target = books.length > 0 ? `/books/${books[0].id}` : '/books'; const url = window.location.origin + target; navigator.clipboard?.writeText(url).catch(() => {}); }}>
                 Share latest release
               </Button>
             }
@@ -273,7 +288,7 @@ export default function DashboardPage() {
             <h2 className="mt-3 text-2xl font-semibold text-white">What happened recently</h2>
           </div>
           <Button asChild variant="secondary" className="w-full sm:w-auto">
-            <Link href="/dashboard#activity">Review activity</Link>
+            <Link href="/dashboard#community">Review activity</Link>
           </Button>
         </div>
 

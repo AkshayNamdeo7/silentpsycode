@@ -7,6 +7,7 @@ import Button from "@/components/ui/button";
 import type { BookFilters } from "@/lib/books";
 
 const categoryOptions = ["", "Engineering", "Medical", "UPSC", "JEE", "NEET", "School", "Novels"];
+const subjectOptions = ["", "Physics", "Chemistry", "Biology", "Mathematics", "Algebra", "Calculus", "Computer Science", "English", "History", "Geography", "Political Science", "Economics"];
 const conditionOptions = ["", "New", "Like New", "Good", "Fair"];
 const sortOptions = [
   { value: "newest", label: "Newest" },
@@ -22,7 +23,7 @@ interface BookFiltersProps {
 
 export default function BookFilters({ filters, onChange, onReset }: BookFiltersProps) {
   const activeFilterCount = useMemo(() => {
-    return [filters.search, filters.category, filters.condition, filters.minPrice, filters.maxPrice, filters.college, filters.city]
+    return [filters.search, filters.category, filters.subject, filters.condition, filters.minPrice, filters.maxPrice, filters.college, filters.city]
       .filter((value) => value !== undefined && value !== "")
       .length;
   }, [filters]);
@@ -94,6 +95,21 @@ export default function BookFilters({ filters, onChange, onReset }: BookFiltersP
             {conditionOptions.map((option) => (
               <option key={option} value={option}>
                 {option || "Any condition"}
+              </option>
+            ))}
+          </Select>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-medium text-slate-200">Subject</label>
+          <Select
+            value={filters.subject ?? ""}
+            onChange={(event) => onChange({ ...filters, subject: event.target.value || undefined })}
+            aria-label="Filter by subject"
+          >
+            {subjectOptions.map((option) => (
+              <option key={option} value={option}>
+                {option || "All subjects"}
               </option>
             ))}
           </Select>

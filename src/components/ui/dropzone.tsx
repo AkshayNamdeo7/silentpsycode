@@ -73,12 +73,12 @@ export default function Dropzone({ files, onFilesChange, error }: DropzoneProps)
       {previews.length > 0 ? (
         <div className="grid gap-3 sm:grid-cols-3">
           {previews.map((preview, index) => (
-            <div key={index} className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-900/90">
+            <div key={preview.file.name + preview.file.size + preview.file.lastModified} className="relative overflow-hidden rounded-[1.75rem] border border-white/10 bg-slate-900/90">
               <img src={preview.url} alt={`Preview ${index + 1}`} className="h-32 w-full object-cover" />
               <button
                 type="button"
                 onClick={() => removeImage(index)}
-                className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-slate-950/80 text-white transition hover:bg-rose-500/90"
+                className="absolute right-3 top-3 inline-flex h-10 w-10 items-center justify-center rounded-full bg-slate-950/80 text-white transition hover:bg-rose-500/90"
               >
                 <span className="sr-only">Remove image</span>
                 <span className="text-base">×</span>
