@@ -26,6 +26,14 @@ function LoginForm() {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [statusSuccess, setStatusSuccess] = useState(true);
 
+  const callbackError = searchParams?.get("error") === "auth_callback_error";
+  const displayMessage =
+    statusMessage ??
+    (callbackError
+      ? "Sign in could not be completed. The link may have expired — please try again."
+      : null);
+  const displaySuccess = statusMessage ? statusSuccess : !callbackError;
+
   const validate = () => {
     const nextErrors: Record<string, string> = {};
     if (!email.trim()) {
@@ -132,9 +140,9 @@ function LoginForm() {
                 Continue
               </Button>
 
-              {statusMessage ? (
-                <p className={clsx("rounded-3xl border px-4 py-3 text-sm", statusSuccess ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-200" : "border-rose-500/20 bg-rose-500/10 text-rose-200")}>
-                  {statusMessage}
+              {displayMessage ? (
+                <p className={clsx("rounded-3xl border px-4 py-3 text-sm", displaySuccess ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-200" : "border-rose-500/20 bg-rose-500/10 text-rose-200")}>
+                  {displayMessage}
                 </p>
               ) : null}
             </form>

@@ -1,21 +1,9 @@
+import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
-import { SB_SESSION_COOKIE } from "@/lib/supabase/client";
 
 const protectedRoutePrefixes = ["/dashboard", "/sell"];
 
-function isValidSessionCookie(cookieValue: string | undefined): boolean {
-  if (!cookieValue) return false;
-  try {
-    const decoded = decodeURIComponent(cookieValue);
-    const { t, e } = JSON.parse(decoded);
-    if (!t || typeof e !== "number") return false;
-    return e > Date.now() / 1000;
-  } catch {
-    return false;
-  }
-}
-
-export function requiresAuth(request: NextRequest): NextResponse | undefined {
+export async function requiresAuth(request: NextRequest): Promise<NextResponse | undefined> {
   const pathname = request.nextUrl.pathname;
   const isProtected = protectedRoutePrefixes.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`)
@@ -25,14 +13,39 @@ export function requiresAuth(request: NextRequest): NextResponse | undefined {
     return undefined;
   }
 
-  const cookieValue = request.cookies.get(SB_SESSION_COOKIE)?.value;
-  if (isValidSessionCookie(cookieValue)) {
-    return undefined;
+  let supabaseResponse = NextResponse.next({ request });
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          );
+          supabaseResponse = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
+        },
+      },
+    }
+  );
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/login";
+    redirectUrl.searchParams.set("redirect", pathname);
+    return NextResponse.redirect(redirectUrl);
   }
 
-  const redirectUrl = request.nextUrl.clone();
-  redirectUrl.pathname = "/login";
-  redirectUrl.searchParams.set("redirect", pathname);
-
-  return NextResponse.redirect(redirectUrl);
+  return supabaseResponse;
 }

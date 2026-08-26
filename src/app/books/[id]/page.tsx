@@ -3,6 +3,7 @@
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import Navbar from "@/components/layout/navbar";
 import FavoriteButton from "@/components/marketplace/favorite-button";
 import ShareButton from "@/components/marketplace/share-button";
@@ -146,7 +147,13 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
                 </div>
                 <div>
                   <p className="text-sm uppercase tracking-[0.32em] text-slate-400">Seller</p>
-                  <p className="mt-3 text-lg font-semibold text-white">{sellerName}</p>
+                  {book.seller_id ? (
+                    <Link href={`/seller/${book.seller_id}`} className="mt-3 inline-block text-lg font-semibold text-white transition hover:text-sky-300">
+                      {sellerName}
+                    </Link>
+                  ) : (
+                    <p className="mt-3 text-lg font-semibold text-white">{sellerName}</p>
+                  )}
                   <p className="mt-2 text-sm text-slate-400">{book.city ?? "City not specified"}</p>
                   <p className="mt-1 text-sm text-slate-400">{book.college ?? "College not specified"}</p>
                 </div>

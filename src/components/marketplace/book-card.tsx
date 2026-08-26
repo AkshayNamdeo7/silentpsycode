@@ -79,7 +79,13 @@ export default function BookCard({ book }: BookCardProps) {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="text-sm text-slate-400">Seller</p>
-              <p className="text-sm font-semibold text-white">{sellerName}</p>
+              {book.seller_id ? (
+                <Link href={`/seller/${book.seller_id}`} className="text-sm font-semibold text-white transition hover:text-sky-300">
+                  {sellerName}
+                </Link>
+              ) : (
+                <p className="text-sm font-semibold text-white">{sellerName}</p>
+              )}
             </div>
             <div className="text-right">
               <p className="text-sm text-slate-400">Price</p>

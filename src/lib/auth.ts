@@ -71,6 +71,10 @@ export async function signUpWithEmail(name: string, email: string, password: str
       data: {
         full_name: trimmedName,
       },
+      emailRedirectTo:
+        typeof window !== "undefined"
+          ? `${window.location.origin}/auth/callback`
+          : undefined,
     },
   });
 
@@ -107,7 +111,10 @@ export async function sendPasswordResetEmail(email: string): Promise<AuthResult>
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-    redirectTo: typeof window !== "undefined" ? `${window.location.origin}/login` : undefined,
+    redirectTo:
+      typeof window !== "undefined"
+        ? `${window.location.origin}/auth/callback?next=/update-password`
+        : undefined,
   });
 
   if (error) {
