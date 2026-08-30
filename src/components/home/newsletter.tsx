@@ -28,7 +28,7 @@ export default function Newsletter() {
   };
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-20">
+    <section id="newsletter" className="mx-auto max-w-7xl px-6 py-20">
       <div className="rounded-[2rem] overflow-hidden border border-white/10 bg-gradient-to-r from-slate-950/95 via-slate-900/90 to-slate-950/95 p-8 shadow-[0_0_120px_-40px_rgba(14,165,233,0.2)] sm:p-12">
         <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-center">
           <div>

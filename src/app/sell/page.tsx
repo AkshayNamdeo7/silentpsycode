@@ -38,9 +38,6 @@ const initialState = {
   sellingPrice: "",
   originalPrice: "",
   description: "",
-  college: "",
-  branch: "",
-  semester: "",
   city: "",
   sellerPhone: "",
   whatsappNumber: "",
@@ -81,9 +78,6 @@ function SellPageContent() {
           sellingPrice: b.selling_price.toString(),
           originalPrice: b.original_price?.toString() ?? "",
           description: b.description ?? "",
-          college: b.college ?? "",
-          branch: b.branch ?? "",
-          semester: b.semester ?? "",
           city: b.city ?? "",
           sellerPhone: b.seller_phone ?? "",
           whatsappNumber: b.whatsapp_number ?? "",
@@ -130,9 +124,6 @@ function SellPageContent() {
     if (!form.condition) nextErrors.condition = "Select the book condition.";
     if (!form.sellingPrice.trim()) nextErrors.sellingPrice = "Enter the selling price.";
     else if (isNaN(Number(form.sellingPrice)) || Number(form.sellingPrice) <= 0) nextErrors.sellingPrice = "Enter a valid price.";
-    if (!form.college.trim()) nextErrors.college = "Enter your college.";
-    if (!form.branch.trim()) nextErrors.branch = "Enter your course or branch.";
-    if (!form.semester.trim()) nextErrors.semester = "Enter the semester.";
     if (!form.city.trim()) nextErrors.city = "Enter your city.";
     if (!form.sellerPhone.trim()) nextErrors.sellerPhone = "Enter your phone number.";
     if (!form.whatsappNumber.trim()) nextErrors.whatsappNumber = "Enter your WhatsApp number.";
@@ -167,7 +158,7 @@ function SellPageContent() {
               try {
                 const url = new URL(img.image_url);
                 const path = url.pathname.split("/storage/v1/object/public/book-images/")[1];
-                if (path) await supabase.storage.from("book-images").remove([path]).catch(() => {});
+                if (path) await supabase.storage.from("book-images").remove([decodeURIComponent(path)]).catch(() => {});
               } catch { /* ignore */ }
             }
             await supabase.from("book_images").delete().eq("id", imgId);
@@ -177,6 +168,7 @@ function SellPageContent() {
             const authContext = await getCurrentAuthContext();
             const userId = authContext.userId;
             if (userId) {
+              const nextOrder = existingImages.reduce((max, img) => Math.max(max, img.display_order), 0);
               for (let i = 0; i < form.images.length; i++) {
                 const file = form.images[i];
                 const safeFileName = `${crypto.randomUUID()}-${file.name}`;
@@ -189,7 +181,7 @@ function SellPageContent() {
                   await supabase.from("book_images").insert({
                     book_id: editId,
                     image_url: publicUrlData.publicUrl,
-                    display_order: existingImages.length + i + 1,
+                    display_order: nextOrder + i + 1,
                   });
                 }
               }
@@ -334,24 +326,22 @@ function SellPageContent() {
                   </div>
                 </div>
 
-                <div className="grid gap-6 lg:grid-cols-3">
-                  <div>
-                    <label className="mb-3 block text-sm font-medium text-slate-200" htmlFor="condition">
-                      Condition
-                    </label>
-                    <Select
-                      id="condition"
-                      value={form.condition}
-                      onChange={(event) => handleChange("condition", event.target.value)}
-                    >
-                      {conditions.map((option) => (
-                        <option key={option} value={option}>
-                          {option}
-                        </option>
-                      ))}
-                    </Select>
-                    {errors.condition ? <p className="mt-2 text-sm text-rose-400">{errors.condition}</p> : null}
-                  </div>
+                <div>
+                  <label className="mb-3 block text-sm font-medium text-slate-200" htmlFor="condition">
+                    Condition
+                  </label>
+                  <Select
+                    id="condition"
+                    value={form.condition}
+                    onChange={(event) => handleChange("condition", event.target.value)}
+                  >
+                    {conditions.map((option) => (
+                      <option key={option} value={option}>
+                        {option}
+                      </option>
+                    ))}
+                  </Select>
+                  {errors.condition ? <p className="mt-2 text-sm text-rose-400">{errors.condition}</p> : null}
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-2">
@@ -391,47 +381,6 @@ function SellPageContent() {
                     onChange={(event) => handleChange("description", event.target.value)}
                     placeholder="Describe the condition, edition, and any extra details."
                   />
-                </div>
-
-                <div className="grid gap-6 lg:grid-cols-3">
-                  <div>
-                    <label className="mb-3 block text-sm font-medium text-slate-200" htmlFor="college">
-                      College
-                    </label>
-                    <Input
-                      id="college"
-                      value={form.college}
-                      onChange={(event) => handleChange("college", event.target.value)}
-                      placeholder="Your college"
-                    />
-                    {errors.college ? <p className="mt-2 text-sm text-rose-400">{errors.college}</p> : null}
-                  </div>
-
-                  <div>
-                    <label className="mb-3 block text-sm font-medium text-slate-200" htmlFor="branch">
-                      Course / Branch
-                    </label>
-                    <Input
-                      id="branch"
-                      value={form.branch}
-                      onChange={(event) => handleChange("branch", event.target.value)}
-                      placeholder="e.g. Computer Science"
-                    />
-                    {errors.branch ? <p className="mt-2 text-sm text-rose-400">{errors.branch}</p> : null}
-                  </div>
-
-                  <div>
-                    <label className="mb-3 block text-sm font-medium text-slate-200" htmlFor="semester">
-                      Semester
-                    </label>
-                    <Input
-                      id="semester"
-                      value={form.semester}
-                      onChange={(event) => handleChange("semester", event.target.value)}
-                      placeholder="e.g. 5th semester"
-                    />
-                    {errors.semester ? <p className="mt-2 text-sm text-rose-400">{errors.semester}</p> : null}
-                  </div>
                 </div>
 
                 <div className="grid gap-6 lg:grid-cols-2">
@@ -602,7 +551,7 @@ function SellPageContent() {
                   <div className="rounded-[1.75rem] bg-slate-900/90 p-4">
                     <p className="text-xs uppercase tracking-[0.28em] text-slate-400">Location</p>
                     <p className="mt-2 text-sm font-semibold text-white">
-                      {form.college || "College"}, {form.city || "City"}
+                      {form.city || "City"}
                     </p>
                   </div>
 

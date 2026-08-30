@@ -22,6 +22,13 @@ alter table public.profiles enable row level security;
 create policy profiles_select_own on public.profiles
   for select using (auth.uid() = id);
 
+-- Public read for seller profiles (regular and anonymous visitors).
+-- Only sellers with at least one active listing are exposed to non-owners.
+create policy profiles_select_public on public.profiles
+  for select using (exists (
+    select 1 from public.books b where b.seller_id = profiles.id and b.status = 'active'
+  ));
+
 create policy profiles_insert_own on public.profiles
   for insert with check (auth.uid() = id);
 
@@ -143,6 +150,10 @@ grant select on public.books to authenticated;
 grant select on public.book_images to authenticated;
 grant select on public.books to anon;
 grant select on public.book_images to anon;
+
+-- Allow viewing seller profiles for buyer-facing pages
+grant select on public.profiles to authenticated;
+grant select on public.profiles to anon;
 
 -- Helpful function to keep updated_at current on books
 create or replace function public.update_books_modified_timestamp()

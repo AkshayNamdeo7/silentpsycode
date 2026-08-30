@@ -13,9 +13,6 @@ export interface BookForm {
   sellingPrice: string;
   originalPrice: string;
   description: string;
-  college: string;
-  branch: string;
-  semester: string;
   city: string;
   sellerPhone: string;
   whatsappNumber: string;
@@ -82,9 +79,6 @@ function buildBookDescription(form: BookForm) {
   const details = [
     form.description?.trim(),
     form.subject ? `Subject: ${form.subject.trim()}` : undefined,
-    form.college ? `College: ${form.college.trim()}` : undefined,
-    form.branch ? `Branch: ${form.branch.trim()}` : undefined,
-    form.semester ? `Semester: ${form.semester.trim()}` : undefined,
     form.city ? `City: ${form.city.trim()}` : undefined,
   ].filter((detail): detail is string => Boolean(detail));
 
@@ -127,9 +121,6 @@ export async function publishBook(form: BookForm) {
     whatsapp_number: form.whatsappNumber.trim() || null,
     contact_email: form.email.trim() || null,
     contact_preference: form.contactPreference.trim() || null,
-    college: form.college.trim(),
-    branch: form.branch.trim(),
-    semester: form.semester.trim(),
     city: form.city.trim(),
     status: "active",
   };
@@ -138,7 +129,6 @@ export async function publishBook(form: BookForm) {
     id: userId,
     full_name: form.sellerName.trim() || "Student Seller",
     phone: form.sellerPhone.trim() || null,
-    college: form.college.trim() || null,
     city: form.city.trim() || null,
   });
 
@@ -223,9 +213,6 @@ export async function updateBook(bookId: string, form: BookForm) {
     whatsapp_number: form.whatsappNumber.trim() || null,
     contact_email: form.email.trim() || null,
     contact_preference: form.contactPreference.trim() || null,
-    college: form.college.trim(),
-    branch: form.branch.trim(),
-    semester: form.semester.trim(),
     city: form.city.trim(),
   };
 
@@ -258,7 +245,7 @@ export async function deleteBook(bookId: string) {
       try {
         const url = new URL(img.image_url);
         const path = url.pathname.split("/storage/v1/object/public/book-images/")[1];
-        if (path) await supabase.storage.from("book-images").remove([path]).catch(() => {});
+        if (path) await supabase.storage.from("book-images").remove([decodeURIComponent(path)]).catch(() => {});
       } catch { /* ignore */ }
     }
     await supabase.from("book_images").delete().eq("book_id", bookId);

@@ -20,7 +20,6 @@ export interface SellerProfileDetail {
   college: string | null;
   city: string | null;
   phone: string | null;
-  bio: string | null;
   active_book_count: number;
   sold_book_count: number;
   books: BookWithImages[];
@@ -64,13 +63,9 @@ export async function fetchSellerProfile(sellerId: string): Promise<{ profile: S
 
   const { data: profile, error: profileError } = await supabase
     .from("profiles")
-    .select("id, full_name, avatar_url, created_at, college, city, phone, bio")
+    .select("id, full_name, avatar_url, created_at, college, city, phone")
     .eq("id", sellerId)
     .maybeSingle();
-
-  if (profileError || !profile) {
-    return { profile: null, error: profileError?.message ?? "Seller not found." };
-  }
 
   const [{ count: activeCount }, { count: soldCount }, { data: books }] = await Promise.all([
     supabase
@@ -93,19 +88,41 @@ export async function fetchSellerProfile(sellerId: string): Promise<{ profile: S
       .order("created_at", { ascending: false }),
   ]);
 
+  if (profileError && !profile) {
+    return { profile: null, error: profileError.message ?? "Seller not found." };
+  }
+
+  const activeBooks = (books ?? []) as unknown as BookWithImages[];
+  const firstBook = activeBooks[0];
+
+  if (!profile && !firstBook) {
+    return { profile: null, error: "Seller not found." };
+  }
+
+  const fallbackProfile = firstBook
+    ? {
+        id: sellerId,
+        full_name: firstBook.seller_name ?? null,
+        avatar_url: null,
+        created_at: null,
+        college: firstBook.college ?? null,
+        city: firstBook.city ?? null,
+        phone: firstBook.seller_phone ?? null,
+      }
+    : null;
+
   return {
     profile: {
-      id: profile.id,
-      full_name: profile.full_name ?? "Student Seller",
-      avatar_url: profile.avatar_url ?? null,
-      created_at: profile.created_at ?? null,
-      college: profile.college ?? null,
-      city: profile.city ?? null,
-      phone: profile.phone ?? null,
-      bio: profile.bio ?? null,
+      id: profile?.id ?? sellerId,
+      full_name: profile?.full_name ?? fallbackProfile?.full_name ?? "Student Seller",
+      avatar_url: profile?.avatar_url ?? null,
+      created_at: profile?.created_at ?? null,
+      college: (profile?.college || fallbackProfile?.college) ?? null,
+      city: (profile?.city || fallbackProfile?.city) ?? null,
+      phone: (profile?.phone || fallbackProfile?.phone) ?? null,
       active_book_count: activeCount ?? 0,
       sold_book_count: soldCount ?? 0,
-      books: ((books ?? []) as unknown as BookWithImages[]),
+      books: activeBooks,
     },
     error: null,
   };

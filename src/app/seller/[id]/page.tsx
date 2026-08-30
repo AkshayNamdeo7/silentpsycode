@@ -153,7 +153,7 @@ export default function SellerProfilePage({ params }: { params: Promise<{ id: st
               </div>
 
               <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300">
-                {profile.bio || `Student seller${profile.college ? ` at ${profile.college}` : ""}${profile.city ? ` in ${profile.city}` : ""}. Browse their active listings below.`}
+                Student seller{profile.college ? ` at ${profile.college}` : ""}{profile.city ? ` in ${profile.city}` : ""}. Browse their active listings below.
               </p>
             </div>
           </div>

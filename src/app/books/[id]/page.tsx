@@ -155,7 +155,6 @@ export default function BookDetailPage({ params }: { params: Promise<{ id: strin
                     <p className="mt-3 text-lg font-semibold text-white">{sellerName}</p>
                   )}
                   <p className="mt-2 text-sm text-slate-400">{book.city ?? "City not specified"}</p>
-                  <p className="mt-1 text-sm text-slate-400">{book.college ?? "College not specified"}</p>
                 </div>
               </div>
 
