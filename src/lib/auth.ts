@@ -1,5 +1,6 @@
 import { isSupabaseClientConfigured, supabase } from "@/lib/supabase";
 import { ensureUserProfile } from "@/lib/profiles";
+import { getSiteUrl } from "@/lib/site-url";
 
 export type AuthResult = {
   success: boolean;
@@ -71,10 +72,7 @@ export async function signUpWithEmail(name: string, email: string, password: str
       data: {
         full_name: trimmedName,
       },
-      emailRedirectTo:
-        typeof window !== "undefined"
-          ? `${window.location.origin}/auth/callback`
-          : undefined,
+      emailRedirectTo: `${getSiteUrl()}/auth/callback`,
     },
   });
 
@@ -111,10 +109,7 @@ export async function sendPasswordResetEmail(email: string): Promise<AuthResult>
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
-    redirectTo:
-      typeof window !== "undefined"
-        ? `${window.location.origin}/auth/callback?next=/update-password`
-        : undefined,
+    redirectTo: `${getSiteUrl()}/auth/callback?next=/update-password`,
   });
 
   if (error) {

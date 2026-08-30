@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { LucideIcon } from "lucide-react";
 import Button from "@/components/ui/button";
 import { supabase, isSupabaseClientConfigured } from "@/lib/supabase/client";
+import { getSiteUrl } from "@/lib/site-url";
 
 interface OAuthButtonProps {
   label: string;
@@ -36,7 +37,7 @@ export default function OAuthButton({
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${getSiteUrl()}/auth/callback`,
           queryParams: {
             prompt: "select_account",
           },
