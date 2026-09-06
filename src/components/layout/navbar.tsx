@@ -76,7 +76,10 @@ export default function Navbar() {
   useEffect(() => {
     if (!menuOpen) return;
 
-    function handleClickOutside(event: MouseEvent) {
+    function handleOutsideInteraction(event: Event) {
+      if (event.type === "click" && (event.target as Element | null)?.closest?.("a, button")) {
+        return;
+      }
       const clickedInsideDesktop = desktopMenuRef.current?.contains(event.target as Node) ?? false;
       const clickedInsideMobile = mobileMenuRef.current?.contains(event.target as Node) ?? false;
       if (!clickedInsideDesktop && !clickedInsideMobile) {
@@ -88,10 +91,10 @@ export default function Navbar() {
       if (event.key === "Escape") setMenuOpen(false);
     }
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("click", handleOutsideInteraction);
     document.addEventListener("keydown", handleKeyDown);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("click", handleOutsideInteraction);
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [menuOpen]);
