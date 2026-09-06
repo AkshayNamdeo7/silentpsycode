@@ -11,7 +11,7 @@ export default function Footer() {
           </p>
           <div className="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-5 text-sm text-slate-300">
             <p className="font-medium text-white">Need support?</p>
-            <p className="mt-2">Reach out at <a href="mailto:hello@silentpsycode.com" className="text-sky-300 hover:text-sky-200">hello@silentpsycode.com</a></p>
+            <p className="mt-2">Reach out at <a href="mailto:silentpsycode@gmail.com" className="text-sky-300 hover:text-sky-200">silentpsycode@gmail.com</a></p>
           </div>
         </div>
 
@@ -29,7 +29,7 @@ export default function Footer() {
             <nav className="mt-5 space-y-3 text-sm text-slate-400">
               <Link href="/#features" className="block transition hover:text-white">About</Link>
               <Link href="/sell" className="block transition hover:text-white">Start selling</Link>
-              <Link href="mailto:hello@silentpsycode.com" className="block transition hover:text-white">Contact</Link>
+              <Link href="mailto:silentpsycode@gmail.com" className="block transition hover:text-white">Contact</Link>
             </nav>
           </div>
         </div>
