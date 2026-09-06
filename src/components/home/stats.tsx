@@ -1,13 +1,44 @@
 ﻿"use client";
 
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { fetchMarketplaceStats } from "@/lib/books";
 
 export default function Stats() {
-  const stats = [
-    { value: "10K+", label: "Premium books", accent: "bg-sky-500/10 text-sky-300" },
-    { value: "4.9/5", label: "Average reader score", accent: "bg-fuchsia-500/10 text-fuchsia-300" },
-    { value: "24h", label: "Fast processing", accent: "bg-emerald-500/10 text-emerald-300" },
-  ];
+  const [stats, setStats] = useState<{ value: string; label: string; accent: string }[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchMarketplaceStats()
+      .then((result) => {
+        if (cancelled || !result) return;
+        const list = [
+          {
+            value: result.bookCount.toLocaleString("en-IN"),
+            label: "Live book listings",
+            accent: "bg-sky-500/10 text-sky-300",
+          },
+          {
+            value: result.cityCount.toLocaleString("en-IN"),
+            label: "Cities with listings",
+            accent: "bg-fuchsia-500/10 text-fuchsia-300",
+          },
+          {
+            value: result.categoryCount.toLocaleString("en-IN"),
+            label: "Categories",
+            accent: "bg-emerald-500/10 text-emerald-300",
+          },
+        ];
+        const hasData = result.bookCount > 0 || result.cityCount > 0 || result.categoryCount > 0;
+        setStats(hasData ? list : []);
+      })
+      .catch(() => setStats([]));
+    return () => { cancelled = true; };
+  }, []);
+
+  if (stats.length === 0) {
+    return null;
+  }
 
   return (
     <section className="mx-auto max-w-7xl px-6 py-24 sm:px-8">

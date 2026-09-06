@@ -18,20 +18,20 @@ const categories = [
 
 const stats = [
   {
-    label: "Verified Sellers",
-    description: "All sellers are vetted to keep every book trusted.",
+    label: "Student Pricing",
+    description: "Affordable second-hand prices on the books you need.",
   },
   {
-    label: "Affordable Prices",
-    description: "Student-friendly savings on every used textbook.",
+    label: "Direct Contact",
+    description: "Reach sellers directly by phone, WhatsApp or email.",
   },
   {
-    label: "Fast Listing",
-    description: "Sell books quickly with a smooth, modern workflow.",
+    label: "Quick Listing",
+    description: "Publish a used book in minutes with photos and a price.",
   },
   {
-    label: "Secure Marketplace",
-    description: "Your transactions and listings are protected end-to-end.",
+    label: "Wide Selection",
+    description: "Textbooks, guides and novels across student categories.",
   },
 ];
 

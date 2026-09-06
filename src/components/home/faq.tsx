@@ -4,16 +4,20 @@ import SectionTitle from "@/components/common/section-title";
 
 const faqs = [
   {
-    question: "How fast can I receive my books?",
-    answer: "Most orders ship within 24 hours, and digital titles are delivered instantly after checkout.",
+    question: "How do I buy a book?",
+    answer: "Browse the marketplace, open a listing you like, and use the Call or Email buttons to contact the seller directly and arrange delivery or pickup.",
   },
   {
-    question: "Can I sell my used books here?",
-    answer: "Yes. Our marketplace supports easy listings for used and collectible books with transparent pricing.",
+    question: "How do I sell my books?",
+    answer: "Sign in, go to Sell a Book, add photos and details, set a price and publish. Buyers contact you using the details on your listing.",
   },
   {
-    question: "Do you offer recommendations?",
-    answer: "Absolutely — our curated collections and trending recommendations help you find the right book quickly.",
+    question: "Do you handle payments or delivery?",
+    answer: "No. Silent Psycode simply connects buyers and sellers. Agree on payment and handover yourselves, and keep safety in mind when meeting.",
+  },
+  {
+    question: "How are books listed?",
+    answer: "Every listing is published by the seller with a condition tag, price and city, and can be removed at any time from the dashboard.",
   },
 ];
 

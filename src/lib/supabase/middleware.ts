@@ -1,7 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 
-const protectedRoutePrefixes = ["/dashboard", "/sell"];
+const protectedRoutePrefixes = ["/dashboard", "/settings", "/sell"];
 
 export async function requiresAuth(request: NextRequest): Promise<NextResponse | undefined> {
   const pathname = request.nextUrl.pathname;

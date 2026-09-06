@@ -400,3 +400,55 @@ export async function fetchBookById(bookId: string) {
 
   return { book: data as BookWithImages, error: null };
 }
+
+export async function fetchMarketplaceStats(): Promise<{
+  bookCount: number;
+  cityCount: number;
+  categoryCount: number;
+} | null> {
+  if (!isSupabaseClientConfigured) {
+    return null;
+  }
+
+  const [{ count: bookCount }, { data: cities }, { data: categories }] = await Promise.all([
+    supabase.from("books").select("id", { count: "exact", head: true }).eq("status", "active"),
+    supabase.from("books").select("city").eq("status", "active").not("city", "is", null),
+    supabase.from("books").select("category").eq("status", "active").not("category", "is", null),
+  ]);
+
+  const citySet = new Set(
+    ((cities ?? []) as Array<{ city: string | null }>)
+      .map((row) => row.city?.trim().toLowerCase())
+      .filter((city): city is string => Boolean(city))
+  );
+  const categorySet = new Set(
+    ((categories ?? []) as Array<{ category: string | null }>)
+      .map((row) => row.category?.trim())
+      .filter((category): category is string => Boolean(category))
+  );
+
+  return {
+    bookCount: bookCount ?? 0,
+    cityCount: citySet.size,
+    categoryCount: categorySet.size,
+  };
+}
+
+export async function fetchCategoryCounts(categoryList: string[]): Promise<Record<string, number>> {
+  if (!isSupabaseClientConfigured || categoryList.length === 0) {
+    return {};
+  }
+
+  const entries = await Promise.all(
+    categoryList.map(async (category) => {
+      const { count } = await supabase
+        .from("books")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "active")
+        .eq("category", category);
+      return [category, count ?? 0] as const;
+    })
+  );
+
+  return Object.fromEntries(entries);
+}

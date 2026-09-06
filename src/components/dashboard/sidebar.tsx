@@ -1,15 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { BookOpen, Heart, Home, LayoutDashboard, Users, Settings, X } from "lucide-react";
+import { BookOpen, Heart, LayoutDashboard, Settings, X } from "lucide-react";
 
 const navItems = [
   { label: "Overview", icon: LayoutDashboard, href: "/dashboard#overview" },
   { label: "My Books", icon: BookOpen, href: "/dashboard#listings" },
   { label: "Favorites", icon: Heart, href: "/dashboard/favorites" },
-  { label: "Orders", icon: Home, href: "/dashboard#orders" },
-  { label: "Community", icon: Users, href: "/dashboard#community" },
-  { label: "Settings", icon: Settings, href: "/dashboard#settings" },
+  { label: "Settings", icon: Settings, href: "/settings" },
 ];
 
 interface SidebarProps {
@@ -40,12 +38,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         </div>
 
         <div className="mt-6 rounded-[2rem] border border-white/10 bg-slate-950/95 p-6 shadow-[0_30px_80px_-40px_rgba(15,23,42,0.65)] lg:mt-0">
-          <div className="mb-8 rounded-[1.75rem] border border-white/10 bg-slate-900/90 p-5 text-center">
-            <p className="text-sm uppercase tracking-[0.3em] text-sky-300/80">Account balance</p>
-            <p className="mt-3 text-3xl font-semibold text-white">₹12,480</p>
-            <p className="mt-2 text-sm text-slate-400">Available for payout</p>
-          </div>
-
           <nav className="space-y-2">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -53,6 +45,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                 <Link
                   key={item.label}
                   href={item.href}
+                  onClick={onClose}
                   className="flex items-center gap-3 rounded-3xl border border-transparent px-4 py-3 text-sm text-slate-300 transition hover:border-sky-500/20 hover:bg-slate-900/80 hover:text-white"
                 >
                   <Icon className="h-4 w-4" />
@@ -66,6 +59,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             <p className="text-sm uppercase tracking-[0.3em] text-slate-400">Quick action</p>
             <Link
               href="/sell"
+              onClick={onClose}
               className="mt-4 inline-flex w-full items-center justify-center rounded-full bg-sky-500 px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
             >
               Sell a Book

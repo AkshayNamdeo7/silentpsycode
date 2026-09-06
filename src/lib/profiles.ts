@@ -56,6 +56,63 @@ export async function ensureUserProfile(id: string, full_name: string): Promise<
   return { success: true, message: "Profile created." };
 }
 
+export async function fetchUserProfile(userId: string): Promise<ProfileRecord | null> {
+  if (!isSupabaseClientConfigured || !userId) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id, full_name, phone, city, avatar_url, created_at")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return data as ProfileRecord;
+}
+
+export async function updateUserProfile(
+  userId: string,
+  updates: { full_name?: string; city?: string | null; phone?: string | null }
+): Promise<{ success: boolean; message: string }> {
+  if (!isSupabaseClientConfigured || !userId) {
+    return { success: false, message: "Supabase is not configured." };
+  }
+
+  if (!updates.full_name?.trim()) {
+    return { success: false, message: "Please enter a display name." };
+  }
+
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .update({
+      full_name: updates.full_name.trim(),
+      city: updates.city?.trim() || null,
+      phone: updates.phone?.trim() || null,
+    })
+    .eq("id", userId);
+
+  if (profileError) {
+    return { success: false, message: profileError.message ?? "Failed to update profile." };
+  }
+
+  const { error: metadataError } = await supabase.auth.updateUser({
+    data: { full_name: updates.full_name.trim() },
+  });
+
+  if (metadataError) {
+    return {
+      success: false,
+      message: "Profile saved, but the display name could not be synced: " + metadataError.message,
+    };
+  }
+
+  return { success: true, message: "Profile updated." };
+}
+
 export async function fetchSellerProfile(sellerId: string): Promise<{ profile: SellerProfileDetail | null; error: string | null }> {
   if (!isSupabaseClientConfigured) {
     return { profile: null, error: null };

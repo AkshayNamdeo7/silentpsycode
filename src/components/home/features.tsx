@@ -4,16 +4,16 @@ import SectionTitle from "@/components/common/section-title";
 
 const features = [
   {
-    title: "Buy, sell and discover",
-    description: "A premium book marketplace built for book lovers who want modern browsing, fair pricing, and seamless checkout.",
+    title: "Buy and discover",
+    description: "Browse live listings from student sellers by category, subject, city and price.",
   },
   {
-    title: "Curated collections",
-    description: "Explore collections chosen by experts, authors, and trendsetters for faster discovery and higher-quality reads.",
+    title: "Sell used books",
+    description: "List your old textbooks and novels with photos, condition and a fair price.",
   },
   {
-    title: "Personalized recommendations",
-    description: "Find books matched to your interests with smart browsing and curated featured lists.",
+    title: "Direct communication",
+    description: "No middlemen — contact sellers directly to arrange delivery or pickup.",
   },
 ];
 

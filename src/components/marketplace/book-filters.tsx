@@ -141,16 +141,6 @@ export default function BookFilters({ filters, onChange, onReset }: BookFiltersP
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-200">College</label>
-          <Input
-            value={filters.college ?? ""}
-            onChange={(event) => onChange({ ...filters, college: event.target.value || undefined })}
-            placeholder="College name"
-            aria-label="Filter by college"
-          />
-        </div>
-
-        <div>
           <label className="mb-2 block text-sm font-medium text-slate-200">City</label>
           <Input
             value={filters.city ?? ""}

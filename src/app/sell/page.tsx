@@ -24,7 +24,7 @@ const categories = [
 ];
 
 const conditions = ["New", "Like New", "Good", "Fair"];
-const contactPreferences = ["Email", "WhatsApp", "Phone", "In-app Chat"];
+const contactPreferences = ["Email", "WhatsApp", "Phone"];
 
 const initialState = {
   images: [] as File[],

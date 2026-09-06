@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-import { Menu, ChevronDown, Search, Bell } from "lucide-react";
+import { Menu, ChevronDown } from "lucide-react";
 import { getCurrentAuthContext, signOut } from "@/lib/auth";
 
 interface TopNavProps {
@@ -58,19 +58,6 @@ export default function TopNav({ onToggleSidebar }: TopNavProps) {
       </div>
 
       <div className="flex flex-1 items-center justify-end gap-3 sm:gap-4">
-        <div className="hidden items-center gap-3 rounded-3xl border border-white/10 bg-slate-950/90 px-4 py-3 text-slate-200 sm:flex">
-          <Search className="h-4 w-4 text-slate-400" />
-          <input
-            type="search"
-            placeholder="Search books, orders, authors..."
-            className="w-full bg-transparent text-sm text-white placeholder:text-slate-500 focus:outline-none"
-          />
-        </div>
-
-        <button className="hidden rounded-3xl border border-white/10 bg-slate-950/90 p-3 text-slate-200 transition hover:bg-slate-900 sm:inline-flex">
-          <Bell className="h-4 w-4" />
-        </button>
-
         <Link
           href="/sell"
           className="rounded-full bg-sky-500 px-4 py-2 text-xs font-semibold text-slate-950 transition hover:bg-sky-400 sm:px-5 sm:py-3 sm:text-sm"
@@ -101,14 +88,15 @@ export default function TopNav({ onToggleSidebar }: TopNavProps) {
               className="absolute right-0 z-20 mt-3 w-56 rounded-[1.75rem] border border-white/10 bg-slate-950/95 p-4 shadow-[0_30px_90px_-50px_rgba(0,0,0,0.5)]"
             >
               <div className="space-y-2">
-                <Link href="/dashboard#settings" className="block w-full rounded-3xl px-4 py-3 text-left text-sm text-slate-200 transition hover:bg-slate-900" onClick={() => setProfileOpen(false)}>
-                  Profile
+                <Link href="/settings" className="block w-full rounded-3xl px-4 py-3 text-left text-sm text-slate-200 transition hover:bg-slate-900" onClick={() => setProfileOpen(false)}>
+                  Profile &amp; settings
                 </Link>
-                <Link href="/dashboard#settings" className="block w-full rounded-3xl px-4 py-3 text-left text-sm text-slate-200 transition hover:bg-slate-900" onClick={() => setProfileOpen(false)}>
-                  Billing
+                <Link href="/dashboard#listings" className="block w-full rounded-3xl px-4 py-3 text-left text-sm text-slate-200 transition hover:bg-slate-900" onClick={() => setProfileOpen(false)}>
+                  My Books
                 </Link>
                 <button
-                  className="w-full rounded-3xl px-4 py-3 text-left text-sm text-slate-200 transition hover:bg-slate-900"
+                  type="button"
+                  className="w-full rounded-3xl px-4 py-3 text-left text-sm text-rose-200 transition hover:bg-slate-900"
                   onClick={handleSignOut}
                 >
                   Sign out

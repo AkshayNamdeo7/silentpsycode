@@ -169,7 +169,7 @@ export default function Navbar() {
                       <PlusCircle className="h-4 w-4 text-sky-300" />
                       Sell Book
                     </Link>
-                    <Link href="/dashboard#settings" className="flex items-center gap-3 rounded-2xl px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-900" onClick={() => setMenuOpen(false)}>
+                    <Link href="/settings" className="flex items-center gap-3 rounded-2xl px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-900" onClick={() => setMenuOpen(false)}>
                       <Settings className="h-4 w-4 text-sky-300" />
                       Settings
                     </Link>
@@ -213,7 +213,7 @@ export default function Navbar() {
                       <Link href="/dashboard#listings" className="flex items-center gap-3 rounded-2xl px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-900" onClick={() => setMenuOpen(false)}><BookOpen className="h-4 w-4 text-sky-300" />My Books</Link>
                       <Link href="/sell" className="flex items-center gap-3 rounded-2xl px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-900" onClick={() => setMenuOpen(false)}><PlusCircle className="h-4 w-4 text-sky-300" />Sell Book</Link>
                       <Link href="/dashboard/favorites" className="flex items-center gap-3 rounded-2xl px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-900" onClick={() => setMenuOpen(false)}><Heart className="h-4 w-4 text-sky-300" />Favorites</Link>
-                      <Link href="/dashboard#settings" className="flex items-center gap-3 rounded-2xl px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-900" onClick={() => setMenuOpen(false)}><Settings className="h-4 w-4 text-sky-300" />Settings</Link>
+                      <Link href="/settings" className="flex items-center gap-3 rounded-2xl px-3 py-2 text-sm text-slate-200 transition hover:bg-slate-900" onClick={() => setMenuOpen(false)}><Settings className="h-4 w-4 text-sky-300" />Settings</Link>
                       <button type="button" onClick={handleLogout} className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-left text-sm text-rose-200 transition hover:bg-slate-900"><LogOut className="h-4 w-4 text-rose-300" />Logout</button>
                     </div>
                   </motion.div>

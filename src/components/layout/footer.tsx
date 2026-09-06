@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="space-y-5">
           <p className="text-2xl font-semibold text-white">Silent Psycode</p>
           <p className="max-w-md text-sm leading-7 text-slate-400">
-            A premium book marketplace for readers who want beautifully curated discovery, fast buying and thoughtful recommendations.
+            A student book marketplace for buying, selling and discovering second-hand books.
           </p>
           <div className="rounded-[1.75rem] border border-white/10 bg-slate-900/80 p-5 text-sm text-slate-300">
             <p className="font-medium text-white">Need support?</p>
@@ -19,27 +19,29 @@ export default function Footer() {
           <div>
             <p className="text-sm uppercase tracking-[0.28em] text-slate-500">Marketplace</p>
             <nav className="mt-5 space-y-3 text-sm text-slate-400">
-              <a href="/#categories" className="block transition hover:text-white">Categories</a>
-              <a href="/#books" className="block transition hover:text-white">Featured Books</a>
-              <a href="/#faq" className="block transition hover:text-white">FAQ</a>
+              <Link href="/books" className="block transition hover:text-white">Browse books</Link>
+              <Link href="/#categories" className="block transition hover:text-white">Categories</Link>
+              <Link href="/#faq" className="block transition hover:text-white">FAQ</Link>
             </nav>
           </div>
           <div>
             <p className="text-sm uppercase tracking-[0.28em] text-slate-500">Company</p>
             <nav className="mt-5 space-y-3 text-sm text-slate-400">
               <Link href="/#features" className="block transition hover:text-white">About</Link>
-              <Link href="/#categories" className="block transition hover:text-white">Categories</Link>
+              <Link href="/sell" className="block transition hover:text-white">Start selling</Link>
               <Link href="mailto:hello@silentpsycode.com" className="block transition hover:text-white">Contact</Link>
             </nav>
           </div>
         </div>
 
         <div className="space-y-4">
-          <p className="text-sm uppercase tracking-[0.28em] text-slate-500">Stay connected</p>
-          <p className="text-sm leading-7 text-slate-400">Subscribe for updates on premium drops, author moments, and marketplace exclusives.</p>
+          <p className="text-sm uppercase tracking-[0.28em] text-slate-500">Your account</p>
+          <p className="text-sm leading-7 text-slate-400">
+            Manage your listings, favorites and profile settings from one place.
+          </p>
           <div className="flex flex-wrap gap-3">
-            <a href="/#newsletter" className="rounded-full border border-white/10 bg-slate-900/80 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:border-sky-500/30 hover:bg-slate-900">Newsletter</a>
-            <Link href="/sell" className="rounded-full border border-white/10 bg-slate-900/80 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:border-sky-500/30 hover:bg-slate-900">Start selling</Link>
+            <Link href="/dashboard" className="rounded-full border border-white/10 bg-slate-900/80 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:border-sky-500/30 hover:bg-slate-900">My dashboard</Link>
+            <Link href="/settings" className="rounded-full border border-white/10 bg-slate-900/80 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:border-sky-500/30 hover:bg-slate-900">Settings</Link>
           </div>
         </div>
       </div>
