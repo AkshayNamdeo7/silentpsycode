@@ -77,7 +77,9 @@ export default function Navbar() {
     if (!menuOpen) return;
 
     function handleClickOutside(event: MouseEvent) {
-      if (desktopMenuRef.current && !desktopMenuRef.current.contains(event.target as Node)) {
+      const clickedInsideDesktop = desktopMenuRef.current?.contains(event.target as Node) ?? false;
+      const clickedInsideMobile = mobileMenuRef.current?.contains(event.target as Node) ?? false;
+      if (!clickedInsideDesktop && !clickedInsideMobile) {
         setMenuOpen(false);
       }
     }
